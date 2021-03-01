@@ -1,0 +1,24 @@
+<div class="container">
+  <div class="card login-main">
+    <form [formGroup]="form" (ngSubmit)="submit ()">
+      <div class="row align-items-center justify-content-center">
+        <b class="text-center">Administrador</b>
+      </div>
+      <br>
+      <div class="input-group">
+        <input type="text" class="form-control" placeholder="Correo electronico" formControlName="email">
+      </div>
+      <br>
+      <div class="input-group">
+        <input type="password" class="form-control" placeholder="********" formControlName="password">
+      </div>
+      <br>
+      <button type="submit" style="width: 100%;"class="btn btn-primary" [disabled]="loading === true">
+        <div *ngIf="loading === false">Ingresar</div>
+        <div *ngIf="loading === true" class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </button>
+    </form>
+  </div>
+</div>

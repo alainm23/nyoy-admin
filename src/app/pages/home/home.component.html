@@ -1,0 +1,140 @@
+<ng-template #dialog let-data let-ref="dialogRef">
+  <nb-card [nbSpinner]="loading">
+    <nb-card-header *ngIf="data === false">
+      Registrar
+    </nb-card-header>
+    <nb-card-header *ngIf="data === true">
+      Editar
+    </nb-card-header>
+
+    <nb-card-body>
+      <form [formGroup]="form">
+        <div class="row">
+          <div class="col-6 offset-3">
+            <div [className]="avatar_preview === null ? 'avatar-preview avatar-default' : 'avatar-preview'">
+              <img *ngIf="avatar_preview !== null" class="avatar-image" [src]="avatar_preview">
+            </div>
+
+            <div class="" (click)="fileInput.click ()">
+              <button style="margin-top: 1rem;" fullWidth size="tiny" nbButton>Seleccionar</button>
+              <input hidden type="file" accept="image/*" #fileInput (change)="changeListener ($event)">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="nombre" class="label">Nombre:</label>
+          <input type="text" formControlName="nombre" id="nombre" nbInput fullWidth>
+        </div>
+
+        <div class="form-group">
+          <label for="linea_comida" class="label">Linea de comida:</label>
+          <input type="text" formControlName="linea_comida" id="linea_comida" nbInput fullWidth>
+        </div>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label for="telefono" class="label">Telefono:</label>
+              <input type="tel" formControlName="telefono" id="telefono" nbInput fullWidth>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label for="correo" class="label">Correo:</label>
+              <input type="email" formControlName="correo" id="correo" nbInput fullWidth>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label for="color" class="label">Color:</label>
+              <input
+                [colorPicker]="form.get('color').value"
+                [value]="form.get('color').value"
+                (colorPickerChange)="form.get ('color').setValue ($event)"
+                [cpOutputFormat]="hex"
+                formControlName="color"
+                nbInput fullWidth type="text" id="color"/>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label for="orden" class="label">Orden:</label>
+              <input type="number" formControlName="orden" id="orden" nbInput fullWidth>
+            </div>
+          </div>
+        </div>
+      </form>
+    </nb-card-body>
+    <nb-card-footer style="text-align: end;">
+      <button nbButton (click)="cancelar (ref)">Cancelar</button>
+      &nbsp;&nbsp;
+      <button nbButton status="success" (click)="submit (ref, data)" [disabled]="!form.valid">Aceptar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<nb-card>
+  <nb-card-header>
+    <div class="row align-items-center">
+      <div class="col-9">
+        <h5>Empresas</h5>
+      </div>
+
+      <div class="col-3">
+        <button nbButton status="success" fullWidth (click)="registrar_dialog (dialog)">Registrar</button>
+      </div>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="row">
+      <div class="col-4" *ngFor="let item of items">
+        <nb-card>
+          <nb-card-header [ngStyle]="{ 'background-color': item.color }">
+            <div class="row">
+              <div class="col-9" [ngStyle]="{ 'color': getTextColor (item.color) }">
+                {{ item.nombre }}
+              </div>
+
+              <div class="col-3">
+                <img class="header-image" [src]="item.logotipo">
+              </div>
+            </div>
+          </nb-card-header>
+          <nb-card-body style="display: grid;">
+            <b>Telefono:</b>
+            {{ item.telefono }}
+            <b>Correo:</b>
+            {{ item.correo }}
+          </nb-card-body>
+          <nb-card-footer style="display: inline-flex;">
+            <button nbButton fullWidth size="small" ghost [routerLink]="'/pages/cartas/' + item.id">
+              <nb-icon status="primary" icon="book-open-outline"></nb-icon>
+            </button>
+
+            <button *ngIf="item.pos === true" nbButton fullWidth size="small" title="Gestionar Mesas" ghost [routerLink]="'/pages/gestionar-mesas/' + item.id">
+              <nb-icon status="primary" icon="layout-outline"></nb-icon>
+            </button>
+
+            <button nbButton fullWidth size="small" ghost (click)="editar (item, dialog)">
+              <nb-icon status="primary" icon="edit-outline"></nb-icon>
+            </button>
+
+            <button nbButton fullWidth size="small" ghost [routerLink]="'/pages/almacen/' + item.id">
+              <nb-icon status="primary" title="Gestionar almacen" icon="cube-outline"></nb-icon>
+            </button>
+
+            <button nbButton fullWidth size="small" ghost (click)="cambiar_estado (item)">
+              <nb-icon *ngIf="item.habilitado" status="success" title="Click para deshabilitar" icon="eye-outline"></nb-icon>
+              <nb-icon *ngIf="!item.habilitado" status="danger" title="Click para habilitar" icon="eye-off-outline"></nb-icon>
+            </button>
+          </nb-card-footer>
+        </nb-card>
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>

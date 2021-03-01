@@ -1,0 +1,299 @@
+<ng-template #dialog let-data let-ref="dialogRef">
+  <nb-card [nbSpinner]="loading" style="overflow-y: scroll; height: 500px;">
+    <nb-card-header *ngIf="data === false">
+      Registrar
+    </nb-card-header>
+    <nb-card-header *ngIf="data === true">
+      Editar
+    </nb-card-header>
+
+    <nb-card-body>
+      <div [className]="avatar_preview === null ? 'avatar-preview avatar-default' : 'avatar-preview'">
+        <img *ngIf="avatar_preview !== null" class="avatar-image" [src]="avatar_preview">
+      </div>
+
+      <div class="" (click)="fileInput.click ()">
+        <button style="margin-top: 1rem;" fullWidth size="tiny" nbButton>Seleccionar</button>
+        <input hidden type="file" accept="image/*" #fileInput (change)="changeListener ($event)">
+      </div>
+      <br>
+
+      <form [formGroup]="form">
+        <div class="form-group">
+          <label for="nombre" class="label">Nombre:</label>
+          <input type="text" formControlName="nombre" id="nombre" nbInput fullWidth>
+        </div>
+
+        <div class="form-group">
+          <label for="sku" class="label">SKU:</label>
+          <input type="text" formControlName="sku" id="sku" nbInput fullWidth>
+        </div>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label for="categoria" class="label">Categoria:</label>
+              <nb-select formControlName="categoria_id" id="categoria" fullWidth (selectedChange)="onCategoriaSelected($event)">
+                <nb-option *ngFor="let item of categorias" [value]="item.id">
+                  {{ item.nombre }}
+                </nb-option>
+              </nb-select>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label for="subcategoria_id" class="label">Sub Categoria:</label>
+              <nb-select formControlName="subcategoria_id" id="subcategoria_id" fullWidth>
+                <nb-option *ngFor="let item of subcategorias" [value]="item.id">
+                  {{ item.nombre }}
+                </nb-option>
+              </nb-select>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label for="marca_id" class="label">Marcas:</label>
+              <nb-select formControlName="marca_id" id="marca_id" fullWidth>
+                <nb-option *ngFor="let item of marcas" [value]="item.id">
+                  {{ item.nombre }}
+                </nb-option>
+              </nb-select>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="form-group">
+              <label for="medida" class="label">Und. Medida:</label>
+              <nb-select formControlName="medida" id="medida" fullWidth>
+                <nb-option value="Kg">Kilogramos</nb-option>
+                <nb-option value="g">Gramos</nb-option>
+                <nb-option value="L">Litro</nb-option>
+                <nb-option value="gal">Galones</nb-option>
+                <nb-option value="Paquete">Paquete</nb-option>
+                <nb-option value="uds.">Unidad</nb-option>
+              </nb-select>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <div>
+                <label for="precio_compra" class="label">Precio Compra:</label>
+                &nbsp;
+              </div>
+              <input type="number" formControlName="precio_compra" id="precio_compra" nbInput fullWidth>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <div>
+                <label for="precio_venta" class="label">Precio Venta:</label>
+              </div>
+              <input type="number" formControlName="precio_venta" id="precio_venta" nbInput fullWidth>
+            </div>
+          </div>
+        </div>
+      </form>
+    </nb-card-body>
+    <nb-card-footer>
+      <button nbButton (click)="cancelar (ref)">Cancelar</button>
+      &nbsp;&nbsp;
+      <button nbButton status="success" (click)="submit (ref, data)" [disabled]="!form.valid">Aceptar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<ng-template #dialog_registrar_movimiento let-data let-ref="dialogRef">
+  <nb-card [nbSpinner]="loading" style="overflow-y: scroll; height: 500px;">
+    <nb-card-header>
+      Registrar movimiento
+    </nb-card-header>
+
+    <nb-card-body>
+      <form [formGroup]="form_movimiento">
+        <div class="form-group" style="display: block;">
+          <label for="fecha" class="label">Fecha:</label>
+          <input
+            type="date"
+            nbInput
+            fullWidth
+            formControlName="fecha"
+            (ngModelChange)="fecha_cambio ()"
+            id="fecha">
+        </div>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label for="tipo_comprobante" class="label">Tipo comprobante:</label>
+              <nb-select formControlName="tipo_comprobante" id="tipo_comprobante" fullWidth>
+                <nb-option value="ninguno">Ninguno</nb-option>
+                <nb-option value="boleta">Boleta</nb-option>
+                <nb-option value="factura">Factura</nb-option>
+              </nb-select>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="form-group">
+              <label for="nombre" class="label">N° comprobante:</label>
+              <input type="text" formControlName="nro_comprobante" id="nombre" nbInput fullWidth>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <div class="form-group">
+        <label for="producto_seleccionado" class="label">Añada un producto:</label>
+        <input nbInput fullWidth type="text"
+          list="productos" [(ngModel)]='producto_seleccionado'
+          id="producto_seleccionado"
+          (change)="selectProducto (producto_seleccionado)"/>
+        <datalist id="productos">
+          <select>
+            <option *ngFor="let producto of productos" [value]="producto.id">
+              {{ producto.nombre }}
+            </option>
+          </select>
+        </datalist>
+      </div>
+
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col" style="width: 124px;">Cantidad</th>
+            <th scope="col" style="width: 102px;">Precio (S/)</th>
+            <th scope="col">Total</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let item of productos_para_registrar">
+            <td>
+              {{ item.nombre }}
+            </td>
+
+            <td>
+              <input style="width: 78px;" min="0" type="number" nbInput [(ngModel)]="item.cantidad">
+            </td>
+            <td>
+              <input style="width: 100px;" min="0" type="number" nbInput [(ngModel)]="item.precio">
+            </td>
+
+            <td style="width: 128px;">
+              {{ item.cantidad * item.precio | currency:'S/. ' }}
+            </td>
+
+            <td style="width: 12px;">
+              <nb-icon status="danger" icon="close-outline" (click)="remove (item)"></nb-icon>
+            </td>
+          </tr>
+
+          <tr *ngIf="get_precio_total () > 0">
+            <td colspan="3">Total</td>
+            <td>
+              {{ get_precio_total () | currency:'S/. ' }}
+            </td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </nb-card-body>
+    <nb-card-footer>
+      <button nbButton (click)="cancelar (ref)">Cancelar</button>
+      &nbsp;&nbsp;
+      <button nbButton status="success" (click)="registrar_ingresos_insumo (ref)" [disabled]="!form_movimiento.valid || get_precio_total () <= 0">Aceptar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<nb-layout>
+  <nb-layout-column>
+    <nb-card [nbSpinner]="loading">
+      <nb-card-body>
+        <nb-card-header>
+          <div class="row align-items-center">
+            <div class="col-2">
+              <h5>Productos</h5>
+            </div>
+
+            <div class="col-4">
+              <nb-select placeholder="Seleccione una categoria" (selectedChange)="categoriaSelected($event)" [(selected)]="selectedItem">
+                <nb-option *ngFor="let item of categorias" [value]="item">
+                  {{ item.nombre }}
+                </nb-option>
+              </nb-select>
+              <!-- <input style="width: 100%;" nbInput [nbFilterInput]="dataSource" id="search" class="search-input" placeholder="Buscar producto..."> -->
+            </div>
+
+            <div class="col-3">
+              <button nbButton status="success" fullWidth (click)="open_registrar_movimiento_dialog (dialog_registrar_movimiento)">Registrar ingreso</button>
+            </div>
+
+            <div class="col-3">
+              <button nbButton status="success" fullWidth (click)="registrar_dialog (dialog)">Registrar</button>
+            </div>
+          </div>
+        </nb-card-header>
+
+        <table class="table table-striped" [nbTreeGrid]="dataSource" [nbSort]="dataSource" (sort)="updateSort($event)">
+
+          <tr nbTreeGridHeaderRow *nbTreeGridHeaderRowDef="allColumns"></tr>
+          <tr nbTreeGridRow *nbTreeGridRowDef="let row; columns: allColumns"></tr>
+
+          <ng-container [nbTreeGridColumnDef]="customColumn">
+            <th nbTreeGridHeaderCell [nbSortHeader]="getSortDirection(customColumn)" *nbTreeGridHeaderCellDef>
+              {{ customColumn }}
+            </th>
+            <td nbTreeGridCell *nbTreeGridCellDef="let row">
+              <nb-fs-icon [kind]="row.data.kind" [expanded]="row.expanded"></nb-fs-icon>
+              {{row.data [customColumn]}}
+            </td>
+          </ng-container>
+
+          <ng-container *ngFor="let column of defaultColumns; let index = index"
+                        [nbTreeGridColumnDef]="column"
+                        [showOn]="getShowOn(index)">
+            <th nbTreeGridHeaderCell [nbSortHeader]="getSortDirection(column)" *nbTreeGridHeaderCellDef>
+              {{column}}
+            </th>
+            <td nbTreeGridCell *nbTreeGridCellDef="let row">
+              <div *ngIf="row.data [column] !== 'accion'">
+                <span *ngIf="column === 'Precio'">
+                  {{ row.data [column] | currency:'S/. ' }}
+                </span>
+
+                <span *ngIf="column === 'Imagen'">
+                  <img style="width: 64px; height: auto;" [src]="row.data [column]">
+                </span>
+
+                <span *ngIf="column !== 'Precio' && column !== 'Imagen'">
+                  {{ row.data [column] }}
+                </span>
+              </div>
+
+              <div *ngIf="row.data [column] === 'accion'">
+                <button nbButton fullWidth size="small" ghost (click)="editar (row.data ['data'], dialog)">
+                  <nb-icon status="primary" icon="edit-outline"></nb-icon>
+                </button>
+
+                <button nbButton fullWidth size="small" ghost (click)="cambiar_estado (row.data ['data'])">
+                  <nb-icon *ngIf="row.data ['data'].habilitado" status="success" title="Click para deshabilitar" icon="eye-outline"></nb-icon>
+                  <nb-icon *ngIf="!row.data ['data'].habilitado" status="danger" title="Click para habilitar" icon="eye-off-outline"></nb-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+        </table>
+
+      </nb-card-body>
+    </nb-card>
+  </nb-layout-column>
+</nb-layout>

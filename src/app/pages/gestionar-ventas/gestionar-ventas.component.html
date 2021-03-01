@@ -1,0 +1,580 @@
+<ng-template #dialog_cobro let-data let-ref="dialogRef">
+  <nb-card [formGroup]="form_venta" [nbSpinner]="loading">
+    <nb-card-header>
+      <div class="row">
+        <div class="col-6">
+          <h6>Realizar pedido</h6>
+        </div>
+
+        <div class="col-6 text-right">
+          <nb-select placeholder="Seleccione una opcion" formControlName="tipo">
+            <nb-option value="rapido">Rapido</nb-option>
+            <nb-option value="completo">Completo</nb-option>
+          </nb-select>
+        </div>
+      </div>
+
+    </nb-card-header>
+
+    <nb-card-body>
+      <div class="text-center">
+        <h3>{{ get_total () | currency:'S/. ' }}</h3>
+      </div>
+      <br>
+      <div class="linked text-center">
+        <button
+          [status]="form_venta.value.tipo_pago === 'efectivo' ? 'primary' : 'basic'"
+          (click)="cambiar_tipo_pago ('efectivo')"
+          nbButton>
+          <nb-icon icon="npm-outline"></nb-icon>
+          Efectivo
+        </button>
+        <button
+          [status]="form_venta.value.tipo_pago === 'tarjeta' ? 'primary' : 'basic'"
+          (click)="cambiar_tipo_pago ('tarjeta')"
+          nbButton>
+          <nb-icon icon="credit-card-outline"></nb-icon>
+          Tarjeta de credito
+        </button>
+      </div>
+      <br>
+      <ng-container *ngIf="form_venta.value.tipo_pago === 'efectivo'">
+        <div>
+          <label><b>Pago con:</b></label>
+        </div>
+        <div class="linked">
+          <input nbInput fieldSize="medium" type="number" min="0" style="width: 120px;" formControlName="importe">
+          <button
+            [status]="form_venta.value.importe === 10 ? 'primary' : 'basic'"
+            (click)="form_venta.controls ['importe'].setValue (10)"
+            status="primary"
+            *ngIf="get_total () < 10"
+            nbButton>S/. 10
+          </button>
+          <button
+            [status]="form_venta.value.importe === 20 ? 'primary' : 'basic'"
+            (click)="form_venta.controls ['importe'].setValue (20)"
+            *ngIf="get_total () < 20"
+            nbButton>S/. 20
+          </button>
+          <button
+            [status]="form_venta.value.importe === 50 ? 'primary' : 'basic'"
+            (click)="form_venta.controls ['importe'].setValue (50)"
+            *ngIf="get_total () < 50"
+            nbButton>S/. 50
+          </button>
+          <button
+            [status]="form_venta.value.importe === 100 ? 'primary' : 'basic'"
+            (click)="form_venta.controls ['importe'].setValue (100)"
+            *ngIf="get_total () < 100"
+            nbButton>S/. 100
+          </button>
+          <button
+            [status]="form_venta.value.importe === 200 ? 'primary' : 'basic'"
+            (click)="form_venta.controls ['importe'].setValue (200)"
+            *ngIf="get_total () < 200"
+            nbButton>S/. 200
+          </button>
+        </div>
+        <br>
+        <div>
+          <label><b>Su cambio:</b></label>
+        </div>
+
+        <div *ngIf="calcular_cambio () < 0">
+          Ingrese un importe valido
+          <br>
+          <br>
+        </div>
+
+        <div *ngIf="calcular_cambio () > 0">
+          <h6>{{ calcular_cambio () | currency:'S/. ' }}</h6>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="form_venta.value.tipo_pago === 'tarjeta'">
+        <div>
+          <label><b>Codigo:</b></label>
+        </div>
+        <input nbInput fullWidth fieldSize="medium" type="text" formControlName="tarjeta_cod_ref">
+        <br>
+        <br>
+      </ng-container>
+
+      <div>
+        <nb-checkbox formControlName="imprimir_ticket">Imprimir ticket</nb-checkbox>
+      </div>
+      <br>
+      <div *ngIf="form_venta.value.tipo === 'completo'">
+        <div class="row">
+          <div class="col-4">
+            <div class="form-group">
+              <label for="tipo_comprobante"><b>Tipo de comprobante</b></label>
+              <nb-select fullWidth id="tipo_comprobante" placeholder="Seleccione una opcion" formControlName="tipo_comprobante">
+                <nb-option value="boleta">Boleta</nb-option>
+                <nb-option value="factura">Factura</nb-option>
+              </nb-select>
+            </div>
+          </div>
+
+          <div class="col-4">
+            <div class="form-group">
+              <label for="nro_comprobante"><b>N° de comprobante</b></label>
+              <input nbInput fullWidth id="nro_comprobante" formControlName="nro_comprobante" type="text">
+            </div>
+          </div>
+
+          <div class="col-4">
+            <div class="form-group">
+              <label for="cliente_nombre"><b>Nombre del cliente</b></label>
+              <input nbInput fullWidth id="cliente_nombre" formControlName="cliente_nombre" type="text">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <button nbButton status="success" [disabled]="validar_cobrar ()" (click)="submit (ref)" fullWidth>Cobrar</button>
+      </div>
+    </nb-card-body>
+  </nb-card>
+</ng-template>
+
+<ng-template #dialog_abrir_caja let-data let-ref="dialogRef">
+  <nb-card [formGroup]="form_abrir_caja" [nbSpinner]="loading" autocomplete="off">
+    <nb-card-header>
+      <h6>Apertura de caja</h6>
+    </nb-card-header>
+
+    <nb-card-body>
+      <div class="form-group">
+        <label for="monto_apertura"><b>Monto de apertura</b></label>
+        <input formControlName="monto_apertura" nbInput fullWidth id="monto_apertura" type="number">
+      </div>
+
+      <div class="form-group">
+        <label for="cajero_actual"><b>Cajero</b></label>
+        <nb-select fullWidth id="cajero_actual" placeholder="Seleccione una opcion" formControlName="cajero_actual">
+          <nb-option *ngFor="let item of cajeros" [value]="item">
+            {{ item.nombre }}
+          </nb-option>
+        </nb-select>
+      </div>
+      <br>
+      <div class="form-group">
+        <label for="admi_correo"><b>Correo</b></label>
+        <input formControlName="admi_correo" autocomplete="new-password" nbInput fullWidth id="admi_correo" type="email">
+      </div>
+      <div class="form-group">
+        <label for="admi_password"><b>Contraseña</b></label>
+        <input formControlName="admi_password" autocomplete="new-password" nbInput fullWidth id="admi_password" type="password">
+      </div>
+    </nb-card-body>
+
+    <nb-card-footer>
+      <button nbButton status="base" (click)="ref.close ()">Cerrar</button>
+      &nbsp;
+      <button nbButton status="success" [disabled]="form_abrir_caja.invalid" (click)="validar_admi (ref)">Aceptar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<ng-template #dialog_cambio_cajero let-data let-ref="dialogRef">
+  <nb-card [nbSpinner]="loading">
+    <nb-card-header>
+      <div class="row">
+        <div class="col-6">
+          <h6>Cambio de cajero</h6>
+        </div>
+
+        <div class="col-6 text-right">
+          <nb-toggle labelPosition="start" [(ngModel)]="ver_ventas">Ventas</nb-toggle>
+        </div>
+      </div>
+    </nb-card-header>
+
+    <nb-card-body *ngIf="!ver_ventas" [formGroup]="form_abrir_caja">
+      <div>
+        <div class="row">
+          <div class="col-6">
+            <div>
+              <label><b>Inicio de caja:</b> {{ caja_data.cajero_actual.monto_apertura | currency:'S/. ' }}</label>
+            </div>
+
+            <div>
+              <label><b>Total en caja:</b> {{ get_total_lista (data.ventas) + caja_data.cajero_actual.monto_apertura | currency:'S/. ' }}</label>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div>
+              <label><b>Venta total:</b> {{ get_total_lista (data.ventas) | currency:'S/. ' }}</label>
+            </div>
+
+            <div>
+              <label><b>Monto a retirar:</b> {{ (get_total_lista (data.ventas) + caja_data.cajero_actual.monto_apertura) - form_abrir_caja.value.monto_apertura | currency:'S/. ' }}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label for="monto_apertura"><b>Dejar en caja</b></label>
+              <input
+                formControlName="monto_apertura"
+                nbInput fullWidth id="monto_apertura"
+                type="number">
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="form-group">
+              <label for="cajero_actual"><b>Cajero</b></label>
+              <nb-select fullWidth id="cajero_actual" placeholder="Seleccione una opcion" formControlName="cajero_actual">
+                <nb-option *ngFor="let item of get_cajeros_validos (cajeros)" [value]="item">
+                  {{ item.nombre }}
+                </nb-option>
+              </nb-select>
+            </div>
+          </div>
+        </div>
+
+        <br>
+        <div class="form-group">
+          <label for="admi_correo"><b>Correo</b></label>
+          <input formControlName="admi_correo" autocomplete="new-password" nbInput fullWidth id="admi_correo" type="email">
+        </div>
+        <div class="form-group">
+          <label for="admi_password"><b>Contraseña</b></label>
+          <input formControlName="admi_password" autocomplete="new-password" nbInput fullWidth id="admi_password" type="password">
+        </div>
+      </div>
+    </nb-card-body>
+
+    <div *ngIf="ver_ventas" style="overflow-y: scroll; height: 300px;">
+      <table class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Fecha y Hora</th>
+            <th scope="col">Producto</th>
+            <th scope="col">Unidades</th>
+            <th scope="col">Precio</th>
+            <th scope="col">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let venta of data.ventas">
+            <tr *ngFor="let item of venta.productos">
+              <td>
+                {{ venta.fecha }} {{ venta.hora }}
+              </td>
+              <td>
+                {{ item.nombre }}
+              </td>
+              <td class="text-center">
+                {{ item.cantidad }}
+              </td>
+              <td>
+                {{ item.precio | currency:'S/. ' }}
+              </td>
+              <td>
+                {{ get_total_format (item.precio * item.cantidad) | currency:'S/. ' }}
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+        <tfoot>
+          <tr>
+              <td class="text-right" colspan="3">Total:</td><td class="right">{{ get_total_lista (data.ventas) | currency:'S/. ' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <nb-card-footer>
+      <button nbButton status="base" (click)="ref.close ()">Cerrar</button>
+      &nbsp;
+      <button nbButton status="success" [disabled]="validar_cambiar_cajero (get_total_lista (data.ventas))" (click)="cambiar_cajero (ref)">Aceptar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<ng-template #dialog_reporte let-data let-ref="dialogRef">
+  <nb-card>
+    <nb-card-header>
+      <h6>Reporte</h6>
+    </nb-card-header>
+
+    <div style="overflow-y: scroll; height: 300px;">
+      <table class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Fecha y Hora</th>
+            <th scope="col">Producto</th>
+            <th scope="col">Unidades</th>
+            <th scope="col">Cajero</th>
+            <th scope="col">Precio</th>
+            <th scope="col">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let venta of data.ventas">
+            <tr *ngFor="let item of venta.productos">
+              <td>
+                {{ venta.fecha }} {{ venta.hora }}
+              </td>
+              <td>
+                {{ item.nombre }}
+              </td>
+              <td class="text-center">
+                {{ item.cantidad }}
+              </td>
+              <td>
+                {{ item.cajero_nombre }}
+              </td>
+              <td>
+                {{ item.precio | currency:'S/. ' }}
+              </td>
+              <td>
+                {{ get_total_format (item.precio * item.cantidad) | currency:'S/. ' }}
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+
+    <nb-card-footer style="display: inline-flex;">
+      <button nbButton status="base" (click)="ref.close ()">Cerrar</button>
+      <div style="width: 100%; text-align: end; align-self: center;">
+        <h6>Total: {{ get_total_lista (data.ventas) | currency:'S/. ' }}</h6>
+      </div>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<ng-template #dialog_cerrar_caja let-data let-ref="dialogRef">
+  <nb-card>
+    <nb-card-header>
+      <div class="row">
+        <div class="col-6">
+          <h6>Cerrar caja</h6>
+        </div>
+
+        <div class="col-6 text-right">
+          <nb-toggle labelPosition="start" [(ngModel)]="ver_ventas">Ventas</nb-toggle>
+        </div>
+      </div>
+    </nb-card-header>
+
+    <nb-card-body *ngIf="!ver_ventas" [formGroup]="form_abrir_caja">
+      <div>
+        <div class="row">
+          <div class="col-6">
+            <div>
+              <label><b>Inicio de caja:</b> {{ caja_data.cajero_actual.monto_apertura | currency:'S/. ' }}</label>
+            </div>
+
+            <div>
+              <label><b>Total en caja:</b> {{ get_total_lista (data.ventas) + caja_data.cajero_actual.monto_apertura | currency:'S/. ' }}</label>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div>
+              <label><b>Venta total:</b> {{ get_total_lista (data.ventas) | currency:'S/. ' }}</label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="admi_correo"><b>Correo</b></label>
+          <input formControlName="admi_correo" nbInput fullWidth id="admi_correo" type="email">
+        </div>
+        <div class="form-group">
+          <label for="admi_password"><b>Contraseña</b></label>
+          <input formControlName="admi_password" nbInput fullWidth id="admi_password" type="password">
+        </div>
+      </div>
+    </nb-card-body>
+
+    <div *ngIf="ver_ventas" style="overflow-y: scroll; height: 300px;">
+      <table class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Fecha y Hora</th>
+            <th scope="col">Producto</th>
+            <th scope="col">Unidades</th>
+            <th scope="col">Precio</th>
+            <th scope="col">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let venta of data.ventas">
+            <tr *ngFor="let item of venta.productos">
+              <td>
+                {{ venta.fecha }} {{ venta.hora }}
+              </td>
+              <td>
+                {{ item.nombre }}
+              </td>
+              <td class="text-center">
+                {{ item.cantidad }}
+              </td>
+              <td>
+                {{ item.precio | currency:'S/. ' }}
+              </td>
+              <td>
+                {{ get_total_format (item.precio * item.cantidad) | currency:'S/. ' }}
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+        <tfoot>
+          <tr>
+              <td class="text-right" colspan="3">Total:</td><td class="right">{{ get_total_lista (data.ventas) | currency:'S/. ' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <nb-card-footer>
+      <button nbButton status="base" (click)="ref.close ()">Cerrar</button>
+      &nbsp;
+      <button nbButton status="success" (click)="cerrar_caja (ref)">Aceptar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<nb-layout [nbSpinner]="loading">
+  <nb-layout-header>
+    <div class="row" style="width: 100%;" *ngIf="caja_abierta () === true">
+      <div class="col-10" style="display: grid;">
+        <span class="cajero-nombre">{{ caja_data?.cajero_actual.nombre }}</span>
+        <span class="cajero-tiempo">Conectado a: {{ caja_data?.cajero_actual.hora_entrada }} {{ caja_data?.cajero_actual.fecha_entrada }}</span>
+      </div>
+
+      <div class="col-2 text-right">
+        <button nbButton [nbPopover]="templateRef" nbPopoverPlacement="bottom" ghost><nb-icon icon="settings-2-outline"></nb-icon></button>
+        <ng-template #templateRef>
+          <div style="display: table-caption;">
+            <button style="border-radius: 0px;" ghost nbButton (click)="confirmar_cambio_cajero (dialog_cambio_cajero)">
+              <nb-icon icon="flip-2-outline"></nb-icon>Cambiar cajero
+            </button>
+            <hr style="margin: 0px;">
+            <button style="border-radius: 0px;" ghost nbButton (click)="reporte_cajero (dialog_reporte)">
+              <nb-icon icon="book-outline"></nb-icon>Reporte cajero
+            </button>
+            <button style="border-radius: 0px;" ghost nbButton (click)="reporte_total (dialog_reporte)">
+              <nb-icon icon="book-outline"></nb-icon>Reporte venta total
+            </button>
+            <hr style="margin: 0px;">
+            <button style="border-radius: 0px;" ghost nbButton (click)="confirmar_cambio_cajero (dialog_cerrar_caja)">
+              <nb-icon icon="close-circle-outline"></nb-icon>Cerrar caja
+            </button>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="caja_abierta () === false">
+      <button nbButton status="primary" style="margin-left: 1rem;" (click)="abrir_caja (dialog_abrir_caja)">
+        Abrir caja
+      </button>
+    </div>
+  </nb-layout-header>
+
+  <nb-layout-column>
+    <nb-card size="small">
+      <nb-card-header>
+        <input [(ngModel)]="search_text" style="border-radius: 6px 0px 0px 6px; width: 100%;" type="search" #input nbInput autofocus placeholder="Busca algun producto...">
+      </nb-card-header>
+
+      <nb-list [nbSpinner]="search_loading">
+        <!-- <nb-list-item *ngIf="productos_busqueda.length <= 0 && search_text !== '' && search_loading === false">
+          <nb-user [name]="get_registrar_nombre ()" showTitle=false picture="https://simpleicon.com/wp-content/uploads/plus-256x256.png" shape="rectangle">
+          </nb-user>
+        </nb-list-item> -->
+
+        <nb-list-item *ngFor="let item of productos_busqueda">
+          <nb-user [name]="item.nombre" showTitle=false [picture]="item.imagen" shape="rectangle">
+          </nb-user>
+          <button nbButton ghost status="primary" (click)="selectProducto (item)">
+            <nb-icon icon="arrow-forward-outline"></nb-icon>
+          </button>
+        </nb-list-item>
+      </nb-list>
+    </nb-card>
+  </nb-layout-column>
+
+  <nb-layout-column>
+    <nb-card size="small">
+      <nb-card-header style="display: flex; align-items: center;">
+        <h6 style="width: 100%;">Lista de orden</h6>
+        <div style="width: 100%;" class="text-right">
+          <h6>{{ get_cantidad_articulos () }} articulos</h6>
+        </div>
+      </nb-card-header>
+
+      <div style="overflow-y: scroll; height: 100%;">
+        <table class="table table-sm table-striped">
+          <thead>
+            <tr>
+              <th scope="col">N°</th>
+              <th scope="col">Producto</th>
+              <th scope="col">Unidades</th>
+              <th scope="col">Precio</th>
+              <th scope="col">Total</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of lista | keyvalue">
+              <th scope="row">{{ item.value.orden }}</th>
+              <td>{{ item.value.nombre }}</td>
+              <td>
+                <input [min]="1" [max]="item.value.stock" type="number" style="width: 84px;" fieldSize="small" [(ngModel)]="item.value.cantidad" nbInput>
+              </td>
+              <td>
+                {{ item.value.precio | currency:'S/. ' }}
+              </td>
+              <td>
+                {{ get_total_format (item.value.precio * item.value.cantidad) | currency:'S/. ' }}
+              </td>
+              <td>
+                <button nbButton ghost size="small" status="danger" (click)="eliminar_producto (item.value.id)">
+                  <nb-icon icon="close-outline"></nb-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <nb-card-footer style="display: flex; align-items: center;">
+        <button nbTooltip="Limpiar" nbButton outline status="danger" (click)="descartar_confirm ()" [disabled]="lista.size <= 0">
+          <nb-icon icon="trash-2"></nb-icon>
+        </button>
+
+        <button nbTooltip="Imprimir" style="margin-left: 1rem;" nbButton outline status="info" [disabled]="lista.size <= 0">
+          <nb-icon icon="printer"></nb-icon>
+        </button>
+
+        <button nbTooltip="Registrar nota de credito" style="margin-left: 1rem;" (click)="agregar_nota_credito ()" nbButton outline status="info" [disabled]="lista.size <= 0">
+          <nb-icon icon="file-text"></nb-icon>
+        </button>
+
+        <!-- <button nbTooltip="Registrar ingreso/egreso" style="margin-left: 1rem;" (click)="agregar_nota_credito ()" nbButton outline status="info" [disabled]="lista.size <= 0">
+          <nb-icon icon="plus-square"></nb-icon>
+        </button> -->
+
+        <div style="width: 100%;" class="text-right">
+          <button nbButton outline size="giant" status="success" (click)="cobrar_confirmar (dialog_cobro)" [disabled]="lista.size <= 0 || caja_abierta () === false || get_total () < 0">
+            Cobrar:
+            {{ get_total () | currency:'S/. ' }}
+          </button>
+        </div>
+      </nb-card-footer>
+    </nb-card>
+  </nb-layout-column>
+</nb-layout>

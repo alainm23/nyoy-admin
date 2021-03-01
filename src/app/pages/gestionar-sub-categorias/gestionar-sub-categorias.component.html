@@ -1,0 +1,94 @@
+<ng-template #dialog let-data let-ref="dialogRef">
+  <nb-card [nbSpinner]="loading">
+    <nb-card-header *ngIf="data === false">
+      Registrar
+    </nb-card-header>
+    <nb-card-header *ngIf="data === true">
+      Editar
+    </nb-card-header>
+
+    <nb-card-body>
+      <form [formGroup]="form">
+        <div class="form-group">
+          <label for="categoria" class="label">Categoria:</label>
+          <nb-select formControlName="categoria_id" id="categoria" fullWidth>
+            <nb-option *ngFor="let item of categorias" [value]="item.id">
+              {{ item.nombre }}
+            </nb-option>
+          </nb-select>
+        </div>
+
+        <div class="form-group">
+          <label for="nombre" class="label">Nombre:</label>
+          <input type="text" formControlName="nombre" id="nombre" nbInput fullWidth>
+        </div>
+      </form>
+    </nb-card-body>
+    <nb-card-footer>
+      <button nbButton (click)="cancelar (ref)">Cancelar</button>
+      &nbsp;&nbsp;
+      <button nbButton status="success" (click)="submit (ref, data)" [disabled]="!form.valid">Aceptar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<nb-layout>
+  <nb-layout-column>
+    <nb-card [nbSpinner]="loading">
+      <nb-card-body>
+        <nb-card-header>
+          <div class="row align-items-center">
+            <div class="col-3">
+              <h5>Sub Categorias</h5>
+            </div>
+
+            <div class="col-6">
+              <input style="width: 100%;" nbInput [nbFilterInput]="dataSource" id="search" class="search-input" placeholder="Buscar insumo...">
+            </div>
+
+            <div class="col-3">
+              <button nbButton status="success" fullWidth (click)="registrar_dialog (dialog)">Registrar</button>
+            </div>
+          </div>
+        </nb-card-header>
+
+        <table class="table table-striped" [nbTreeGrid]="dataSource" [nbSort]="dataSource" (sort)="updateSort($event)">
+
+          <tr nbTreeGridHeaderRow *nbTreeGridHeaderRowDef="allColumns"></tr>
+          <tr nbTreeGridRow *nbTreeGridRowDef="let row; columns: allColumns"></tr>
+
+          <ng-container [nbTreeGridColumnDef]="customColumn">
+            <th nbTreeGridHeaderCell [nbSortHeader]="getSortDirection(customColumn)" *nbTreeGridHeaderCellDef>
+              {{ customColumn }}
+            </th>
+            <td nbTreeGridCell *nbTreeGridCellDef="let row">
+              <nb-fs-icon [kind]="row.data.kind" [expanded]="row.expanded"></nb-fs-icon>
+              {{row.data [customColumn]}}
+            </td>
+          </ng-container>
+
+          <ng-container *ngFor="let column of defaultColumns; let index = index"
+                        [nbTreeGridColumnDef]="column"
+                        [showOn]="getShowOn(index)">
+            <th nbTreeGridHeaderCell [nbSortHeader]="getSortDirection(column)" *nbTreeGridHeaderCellDef>
+              {{column}}
+            </th>
+            <td nbTreeGridCell *nbTreeGridCellDef="let row">
+              <div *ngIf="row.data [column] !== 'accion'">
+                <span *ngIf="column === 'Precio'">{{ row.data [column] | currency:'S/. ' }}</span>
+                <span *ngIf="column !== 'Precio'">{{ row.data [column] }}</span>
+              </div>
+
+              <div *ngIf="row.data [column] === 'accion'">
+                <button nbButton fullWidth size="small" ghost (click)="editar (row.data ['data'], dialog)">
+                  <nb-icon status="primary" icon="edit-outline"></nb-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+        </table>
+
+      </nb-card-body>
+    </nb-card>
+  </nb-layout-column>
+</nb-layout>

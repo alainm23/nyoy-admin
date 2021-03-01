@@ -1,0 +1,13 @@
+.ng-select.custom ::ng-deep .ng-dropdown-panel {
+  min-height: 0px;
+  border-radius: 0;
+  background-color: #fff;
+}
+
+.ng-select.custom ::ng-deep .ng-select-container  {
+  background-color: #f7f9fc;
+  height: 42px;
+  border: 1px solid #edf1f7;
+  font-family: Open Sans, sans-serif;
+  border-radius: 3px;
+}

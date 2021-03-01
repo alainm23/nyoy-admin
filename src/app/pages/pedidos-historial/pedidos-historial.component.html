@@ -1,0 +1,228 @@
+<ng-template #dialog let-data let-ref="dialogRef">
+  <nb-card [nbSpinner]="loading">
+    <nb-card-header>
+      Detalles
+      &nbsp;
+      <span>Total: {{ data.monto_total | currency:'S/. ' }}</span>
+      &nbsp;
+      <span *ngIf="data.tipo_pago === 'culqi'">Pagado</span>
+      <span *ngIf="data.tipo_pago !== 'culqi'">Contraentrega</span>
+    </nb-card-header>
+
+    <nb-card-body style="width: 750px">
+      <div class="row" style="margin-bottom: 1rem;">
+        <div class="col-3">
+          <p class="color_a6" style="margin-bottom: 0px;">Direccion</p>
+          <p class="color_a6" style="margin-bottom: 0px;">Referencia</p>
+          <p class="color_a6" style="margin-bottom: 0px;">Telefono</p>
+          <p *ngIf="data.estado === 4" class="color_a6" style="margin-bottom: 0px;">
+            Entrega
+          </p>
+          <p *ngIf="data.estado === 5" class="color_a6" style="margin-bottom: 0px;">
+            Cancelado
+          </p>
+          <p *ngIf="data.estado === 6" class="color_a6" style="margin-bottom: 0px;">
+            Rechazado
+          </p>
+        </div>
+        <div class="col-9">
+          <p class="color_74" style="margin-bottom: 0px;">{{ data.direccion }}</p>
+          <p class="color_74" style="margin-bottom: 0px;">{{ data.referencia }}</p>
+          <p class="color_74" style="margin-bottom: 0px;">{{ data.telefono }}</p>
+          <p *ngIf="data.estado === 4" class="color_74" style="margin-bottom: 0px;">
+            {{ get_format (data.hora_entrega) }}
+          </p>
+
+          <p *ngIf="data.estado === 5" class="color_74" style="margin-bottom: 0px;">
+            {{ get_format (data.hora_cancelada) }}
+          </p>
+
+          <p *ngIf="data.estado === 6" class="color_74" style="margin-bottom: 0px;">
+            {{ get_format (data.hora_rechazada) }}
+          </p>
+        </div>
+      </div>
+
+      <div class="row" style="margin-bottom: 1rem;" *ngFor="let plato of data.platos">
+        <div class="col-12 header" *ngIf="plato.tipo === 'menu'">Menus ‧ {{ get_empresa (plato.empresa_id) }}</div>
+        <div class="col-12 header" *ngIf="plato.tipo === 'extra'">Extras ‧ {{ get_empresa (plato.empresa_id) }}</div>
+        <div class="col-12 header" *ngIf="plato.tipo === 'promocion'">Promocion ‧ {{ get_empresa (plato.empresa_id) }}</div>
+        <ng-container *ngIf="plato.tipo === 'extra'">
+          <div class="col-2">
+            <p style="margin-bottom: 0px;" class="color_a6">{{ plato.cantidad }} Unds.</p>
+          </div>
+
+          <div class="col-5">
+            <p style="margin-bottom: 0px;" class="color_74">{{ plato.plato_nombre }}</p>
+          </div>
+
+          <div class="col-5">
+            <p style="margin-bottom: 0px;">{{ plato.comentarios }}</p>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="plato.tipo === 'menu'">
+          <ng-container *ngFor="let menu of plato.menus; index as i">
+            <ng-container *ngIf="menu.cantidad > 0">
+              <div class="col-2">
+                <p style="margin-bottom: 0px;" class="color_a6">{{ menu.cantidad }} Unds.</p>
+              </div>
+
+              <div class="col-5">
+                <p style="margin-bottom: 0px;" class="color_74">{{ menu.nombre }}</p>
+              </div>
+
+              <div class="col-5">
+                <p *ngIf="i === 0" style="margin-bottom: 0px;" class="color_74">
+                  {{ plato.comentario }}
+                </p>
+              </div>
+            </ng-container>
+          </ng-container>
+        </ng-container>
+
+        <ng-container *ngIf="plato.tipo === 'promocion' && plato.promocion_tipo === '1'">
+          <ng-container *ngFor="let plato_p of plato.platos ; index as i">
+            <div class="col-2">
+              <p style="margin-bottom: 0px;" class="color_a6">{{ plato.cantidad }} Unds.</p>
+            </div>
+
+            <div class="col-5">
+              <p style="margin-bottom: 0px;" class="color_74">{{ plato_p.nombre }} ‧ {{ get_empresa (plato_p.empresa_id) }}</p>
+            </div>
+
+            <div class="col-5">
+              <p *ngIf="i === 0" style="margin-bottom: 0px;" class="color_74">
+                {{ plato.comentarios }}
+              </p>
+            </div>
+          </ng-container>
+        </ng-container>
+
+        <ng-container *ngIf="plato.tipo === 'promocion' && plato.promocion_tipo === '0'">
+          <ng-container>
+            <div class="col-2">
+              <p style="margin-bottom: 0px;" class="color_a6">{{ plato.cantidad }} Unds.</p>
+            </div>
+
+            <div class="col-5">
+              <p style="margin-bottom: 0px;" class="color_74">{{ plato.plato_nombre }}</p>
+            </div>
+
+            <div class="col-5">
+              <p style="margin-bottom: 0px;" class="color_74">
+                {{ plato.comentarios }}
+              </p>
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+
+      <ng-container *ngIf="data.estado === 1 && data.tipo_pedido === 'delivery'">
+        <div class="form-group">
+          <label for="repartidor" class="label">Seleccione un repartidor:</label>
+          <nb-select [(ngModel)]="repartidor_seleccionado" placeholder="Seleccione un repartidor" id="repartidor">
+            <nb-option *ngFor="let repartidor of repartidores" [value]="repartidor">
+              {{ repartidor.nombre }}
+            </nb-option>
+          </nb-select>
+        </div>
+      </ng-container>
+    </nb-card-body>
+
+    <nb-card-footer style="text-align: end;">
+      <!-- <button nbButton status="danger" (click)="cancelar_pedido (data, ref)">
+        Cancelar pedido
+      </button>
+      &nbsp;&nbsp;
+
+      <button *ngIf="data.estado === 0" nbButton status="success" (click)="update_estado (1, data, ref)">
+        Pasar a cocina
+      </button>
+
+      <button *ngIf="data.estado === 1 && data.tipo_pedido === 'delivery'" [disabled]="repartidor_seleccionado === null" nbButton status="success" (click)="update_estado (2, data, ref)">
+        Plato Listo
+      </button>
+
+      <button *ngIf="data.estado === 1 && data.tipo_pedido !== 'delivery'" nbButton status="success" (click)="update_estado (2, data, ref)">
+        Plato Listo
+      </button>
+
+      <button *ngIf="data.estado === 2 && data.tipo_pedido !== 'delivery'" nbButton status="success" (click)="entregar_pedido (data, ref)">
+        Entregar pedido
+      </button>
+
+      &nbsp;&nbsp; -->
+      <button nbButton (click)="ref.close ()">Cerrar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<div class="row">
+  <div class="col-4">
+    <nb-card>
+      <nb-card-header>
+        Entregados
+      </nb-card-header>
+      <div *ngFor="let item of get_platos (4) | orderBy: 'hora_entrega'" class="row" class="horizontal" (click)="ver_pedido (dialog, item)">
+        <div class="col-12">
+          <nb-badge [text]="item.monto_total | currency:'S/. '" statfechaus="primary" position="top right"></nb-badge>
+          <nb-badge *ngIf="item.tipo_pedido === 'delivery'" text="Delivery" status="success" position="bottom right"></nb-badge>
+          <nb-badge *ngIf="item.tipo_pedido !== 'delivery' && item.tipo_recojo === 'rapido'" text="Recojo: Rapido" status="warning" position="bottom right"></nb-badge>
+          <nb-badge *ngIf="item.tipo_pedido !== 'delivery' && item.tipo_recojo === 'horario'" [text]="'Recojo: ' + item.hora_seleccionada" status="warning" position="bottom right"></nb-badge>
+
+          <b>{{ item.usuario_nombre }}</b>
+          <p style="margin-bottom: 0px;">{{ item.direccion }}</p>
+          <p *ngIf="item.tipo_pedido === 'delivery'">Tiempo de delivery: {{ cal_tiempo_entrega (item) }} min.</p>
+          <div>
+            <i class="far fa-calendar">&nbsp;{{ get_format_date (item.fecha) }}</i>
+          </div>
+        </div>
+      </div>
+    </nb-card>
+  </div>
+
+  <div class="col-4">
+    <nb-card>
+      <nb-card-header>
+        Cancelados
+      </nb-card-header>
+      <div *ngFor="let item of get_platos (5) | orderBy:'hora_cancelada'" class="row" class="horizontal" (click)="ver_pedido (dialog, item)">
+        <div class="col-12">
+          <nb-badge [text]="item.monto_total | currency:'S/. '" status="primary" position="top right"></nb-badge>
+          <nb-badge *ngIf="item.tipo_pedido === 'delivery'" text="Delivery" status="success" position="bottom right"></nb-badge>
+          <nb-badge *ngIf="item.tipo_pedido !== 'delivery' && item.tipo_recojo === 'rapido'" text="Recojo: Rapido" status="success" position="bottom right"></nb-badge>
+          <nb-badge *ngIf="item.tipo_pedido !== 'delivery' && item.tipo_recojo === 'horario'" [text]="'Recojo: ' + item.hora_seleccionada" status="success" position="bottom right"></nb-badge>
+
+          <b>{{ item.usuario_nombre }}</b>
+          <p>{{ item.direccion }}</p>
+          <div>
+            <i class="far fa-calendar">&nbsp;{{ get_format_date (item.fecha) }}</i>
+          </div>
+        </div>
+      </div>
+    </nb-card>
+  </div>
+
+  <div class="col-4">
+    <nb-card>
+      <nb-card-header>
+        Rechazados
+      </nb-card-header>
+      <div *ngFor="let item of get_platos (6) | orderBy:'fecha'" class="row" class="horizontal" (click)="ver_pedido (dialog, item)">
+        <div class="col-12">
+          <nb-badge [text]="item.monto_total | currency:'S/. '" status="primary" position="top right"></nb-badge>
+          <nb-badge *ngIf="item.tipo_pedido === 'delivery'" text="Delivery" status="success" position="bottom right"></nb-badge>
+          <nb-badge *ngIf="item.tipo_pedido !== 'delivery' && item.tipo_recojo === 'rapido'" text="Recojo: Rapido" status="success" position="bottom right"></nb-badge>
+          <nb-badge *ngIf="item.tipo_pedido !== 'delivery' && item.tipo_recojo === 'horario'" [text]="'Recojo: ' + item.hora_seleccionada" status="success" position="bottom right"></nb-badge>
+
+          <b>{{ item.usuario_nombre }}</b>
+          <p>{{ item.direccion }}</p>
+          <div>
+            <i class="far fa-calendar">&nbsp;{{ get_format_date (item.fecha) }}</i>
+          </div>
+        </div>
+      </div>
+    </nb-card>
+  </div>
+</div>

@@ -1,0 +1,276 @@
+<ng-template #dialog let-data let-ref="dialogRef">
+  <nb-card [nbSpinner]="loading" style="width: 640px; height: 500px">
+    <nb-card-header>
+      Registrar
+    </nb-card-header>
+
+    <div class="row">
+      <div class="col-4">
+        <input #autoInput
+          [(ngModel)]="search_text"
+          nbInput
+          type="text"
+          (ngModelChange)="onChange ()"
+          placeholder="Buscar un insumo..."/>
+
+        <nb-list>
+          <nb-list-item *ngFor="let item of insumos">
+            {{ item.data.nombre }}
+          </nb-list-item>
+        </nb-list>
+      </div>
+
+      <div class="col-8">
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th scope="col">Nombre</th>
+              <th scope="col">Cantidad</th>
+              <th scope="col">Precio</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of para_agregar">
+              <td>
+                {{ item.nombre }}
+              </td>
+
+              <td>
+                <input type="text" [(ngModel)]="item.cantidad">
+              </td>
+              <td>
+                <input type="text" [(ngModel)]="item.precio">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- <nb-card-body>
+      <input #autoInput
+        [(ngModel)]="search_text"
+        nbInput
+        type="text"
+        (ngModelChange)="onChange ()"
+        placeholder="Buscar un insumo..."
+        [nbAutocomplete]="auto" />
+
+      <nb-autocomplete #auto (selectedChange)="onSelectionChange ($event)">
+        <nb-option *ngFor="let item of insumos" [value]="item.data">
+          {{ item.data.nombre }}
+        </nb-option>
+      </nb-autocomplete>
+
+
+    </nb-card-body> -->
+
+    <nb-card-footer>
+      <button nbButton (click)="cancelar (ref)">Cancelar</button>
+      &nbsp;&nbsp;
+      <button nbButton status="success" (click)="submit (ref, data)" [disabled]="!form.valid">Aceptar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<ng-template #dialog_comprobante let-data let-ref="dialogRef">
+  <nb-card>
+    <nb-card-header>
+      Continuar
+    </nb-card-header>
+
+    <nb-card-body>
+      <form [formGroup]="form">
+        <div class="form-group" style="display: block;">
+          <label for="fecha" class="label">Fecha:</label>
+          <input
+            type="date"
+            nbInput
+            fullWidth
+            formControlName="fecha"
+            (ngModelChange)="fecha_cambio ()"
+            id="fecha">
+        </div>
+
+        <div class="form-group">
+          <label for="tipo_comprobante" class="label">Tipo comprobante:</label>
+          <nb-select formControlName="tipo_comprobante" id="tipo_comprobante" fullWidth>
+            <nb-option value="ninguno">Ninguno</nb-option>
+            <nb-option value="boleta">Boleta</nb-option>
+            <nb-option value="factura">Factura</nb-option>
+          </nb-select>
+        </div>
+
+        <div class="form-group">
+          <label for="nombre" class="label">N° comprobante:</label>
+          <input type="text" formControlName="nro_comprobante" id="nombre" nbInput fullWidth>
+        </div>
+      </form>
+    </nb-card-body>
+
+    <nb-card-footer>
+      <button nbButton (click)="cancelar (ref)">Cancelar</button>
+      &nbsp;&nbsp;
+      <button nbButton status="success" (click)="registrar_ingresos_insumo (ref)" [disabled]="!form.valid">Aceptar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<nb-layout>
+  <nb-layout-column>
+    <nb-card [nbSpinner]="loading" *ngIf="vista === 'principal'">
+      <nb-card-header>
+        <div class="row align-items-center">
+          <div class="col-1">
+            <button nbButton fullWidth size="small" ghost [routerLink]="'/pages/home'">
+              <nb-icon status="primary" icon="arrow-ios-back-outline"></nb-icon>
+            </button>
+          </div>
+
+          <div class="col-2">
+            <h5>Almacen</h5>
+          </div>
+
+          <div class="col-6">
+            <input style="width: 100%;" nbInput [nbFilterInput]="dataSource" id="search" class="search-input" placeholder="Buscar insumo...">
+          </div>
+
+          <div class="col-3">
+            <button nbButton status="success" fullWidth (click)="vista = 'registrar'">Registrar</button>
+          </div>
+        </div>
+      </nb-card-header>
+
+      <table class="table table-striped" [nbTreeGrid]="dataSource" [nbSort]="dataSource" (sort)="updateSort($event)">
+
+        <tr nbTreeGridHeaderRow *nbTreeGridHeaderRowDef="allColumns"></tr>
+        <tr nbTreeGridRow *nbTreeGridRowDef="let row; columns: allColumns"></tr>
+
+        <ng-container [nbTreeGridColumnDef]="customColumn">
+          <th nbTreeGridHeaderCell [nbSortHeader]="getSortDirection(customColumn)" *nbTreeGridHeaderCellDef>
+            {{ customColumn }}
+          </th>
+          <td nbTreeGridCell *nbTreeGridCellDef="let row">
+            <nb-fs-icon [kind]="row.data.kind" [expanded]="row.expanded"></nb-fs-icon>
+            {{row.data [customColumn]}}
+          </td>
+        </ng-container>
+
+        <ng-container *ngFor="let column of defaultColumns; let index = index"
+                      [nbTreeGridColumnDef]="column"
+                      [showOn]="getShowOn(index)">
+          <th nbTreeGridHeaderCell [nbSortHeader]="getSortDirection(column)" *nbTreeGridHeaderCellDef>
+            {{column}}
+          </th>
+          <td nbTreeGridCell *nbTreeGridCellDef="let row">
+            <div *ngIf="column === 'Vender'">
+              <button nbButton fullWidth size="small" ghost (click)="update_vender (row.data.data)">
+                {{ row.data [column] }}
+                <nb-icon status="primary" icon="edit-outline"></nb-icon>
+              </button>
+            </div>
+
+            <div *ngIf="column !== 'Vender'">
+              <span *ngIf="column === get_monto_comprado_column ()">{{ row.data [column] | currency:'S/. ' }}</span>
+              <span *ngIf="column !== 'Monto comprado'">{{ row.data [column] }}</span>
+            </div>
+          </td>
+        </ng-container>
+      </table>
+    </nb-card>
+
+    <nb-card [nbSpinner]="loading" *ngIf="vista === 'registrar'">
+      <nb-card-header>
+        <div class="row align-items-center">
+          <div class="col-1">
+            <button nbButton fullWidth size="small" ghost (click)="vista ='principal'">
+              <nb-icon status="primary" icon="arrow-ios-back-outline"></nb-icon>
+            </button>
+          </div>
+
+          <div class="col-8">
+            <h5>Registrar ingreso de insumos</h5>
+          </div>
+
+          <div class="col-3">
+            <button nbButton status="success" [disabled]="get_precio_total () <= 0" fullWidth (click)="continuar (dialog_comprobante)">Continuar</button>
+          </div>
+        </div>
+      </nb-card-header>
+
+      <div class="row">
+        <div class="col-3">
+          <input #autoInput
+            style="width: 100%; margin: 12px;"
+            [(ngModel)]="search_text"
+            nbInput
+            type="text"
+            (ngModelChange)="onChange ()"
+            placeholder="Buscar un insumo..."/>
+
+          <div *ngFor="let item of insumos" style="margin-left: 12px; padding: 6px;">
+            <div class="row">
+              <div class="col-8">
+                {{ item.data.nombre }}
+              </div>
+
+              <div class="col-4">
+                <button nbButton fullWidth size="small" ghost (click)="agregar_para_agregar (item.data)">
+                  <nb-icon status="primary" icon="arrowhead-right-outline"></nb-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-9" style="padding-right: 27px;">
+          <table class="table table-bordered table-striped" style="margin-top: 12px;">
+            <thead>
+              <tr>
+                <th scope="col">Nombre</th>
+                <th scope="col" style="width: 124px;">Cantidad</th>
+                <th scope="col" style="width: 102px;">Precio (S/)</th>
+                <th scope="col">Total</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let item of para_agregar">
+                <td>
+                  {{ item.nombre }}
+                </td>
+
+                <td>
+                  <input style="width: 78px;" min="0" type="number" nbInput [(ngModel)]="item.cantidad">
+                  {{ item.unidad_medida }}
+                </td>
+                <td>
+                  <input style="width: 100px;" min="0" type="number" nbInput [(ngModel)]="item.precio">
+                </td>
+
+                <td style="width: 128px;">
+                  {{ item.cantidad * item.precio | currency:'S/. ' }}
+                </td>
+
+                <td style="width: 12px;">
+                  <nb-icon status="danger" icon="close-outline" (click)="remove (item)"></nb-icon>
+                </td>
+              </tr>
+
+              <tr *ngIf="get_precio_total () > 0">
+                <td colspan="3">Total</td>
+                <td>
+                  {{ get_precio_total () | currency:'S/. ' }}
+                </td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </nb-card>
+  </nb-layout-column>
+</nb-layout>
+

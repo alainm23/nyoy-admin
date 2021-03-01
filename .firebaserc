@@ -1,0 +1,17 @@
+{
+  "projects": {
+    "default": "nyoy-99c14"
+  },
+  "targets": {
+    "nyoy-99c14": {
+      "hosting": {
+        "web": [
+          "nyoy-99c14"
+        ],
+        "api": [
+          "api-nyoy"
+        ]
+      }
+    }
+  }
+}

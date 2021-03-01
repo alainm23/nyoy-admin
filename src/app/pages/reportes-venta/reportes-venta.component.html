@@ -1,0 +1,125 @@
+<nb-layout>
+  <nb-layout-column>
+    <nb-card>
+      <nb-card-header>
+        Reportes
+        &nbsp;
+        &nbsp;
+        <nb-select (selectedChange)="limpiar ()" [(ngModel)]="reporte_tipo" size="small" placeholder="Seleccione una opcion">
+          <nb-option value="productos">Productos</nb-option>
+          <nb-option value="categorias">Categorias</nb-option>
+          <!-- <nb-option value="subcategorias">Subcategorias</nb-option>
+          <nb-option value="marcas">Marcas</nb-option> -->
+        </nb-select>
+        &nbsp;
+        &nbsp;
+        <button nbButton size="small" status="success" (click)="submit ()">Consultar</button>
+      </nb-card-header>
+
+      <nb-card-header *ngIf="reporte_tipo === 'productos'">
+        Cajero:
+        &nbsp;
+        &nbsp;
+        <nb-select size="small" [(ngModel)]="cajero_seleccionado">
+          <nb-option value="0">
+            Ninguno
+          </nb-option>
+
+          <nb-option [value]="caja_data?.cajero_actual?.tmp_id">
+            Cajero actual - {{ caja_data?.cajero_actual?.nombre }}
+          </nb-option>
+
+          <nb-option *ngFor="let item of cajeros" [value]="item.tmp_id">
+            <span *ngIf="item.tmp_id !== caja_data?.cajero_actual?.tmp_id">
+              {{ item.nombre }} - {{ item.hora_entrada }}
+            </span>
+          </nb-option>
+        </nb-select>
+        &nbsp;
+        &nbsp;
+        Hora inicio:
+        &nbsp;
+        &nbsp;
+        <input [(ngModel)]="hora_inicio" nbInput  size="tiny" type="time">
+        &nbsp;
+        &nbsp;
+        Hora fin:
+        &nbsp;
+        &nbsp;
+        <input [(ngModel)]="hora_fin" nbInput  size="tiny" type="time">
+        &nbsp;
+        &nbsp;
+      </nb-card-header>
+
+      <table *ngIf="reporte_tipo === 'productos'" class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Fecha y Hora</th>
+            <th scope="col">Producto</th>
+            <th scope="col">Unidades</th>
+            <th scope="col">Cajero</th>
+            <th scope="col">Precio</th>
+            <th scope="col">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let venta of lista_respuesta">
+            <tr *ngFor="let item of venta.productos">
+              <td>
+                {{ venta.fecha }} {{ venta.hora }}
+              </td>
+              <td>
+                {{ item.nombre }}
+              </td>
+              <td class="text-center">
+                {{ item.cantidad }}
+              </td>
+              <td>
+                {{ venta.cajero_nombre }}
+              </td>
+              <td>
+                {{ item.precio | currency:'S/. ' }}
+              </td>
+              <td>
+                {{ get_total_format (item.precio * item.cantidad) | currency:'S/. ' }}
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="text-right" colspan="5">Total:</td><td class="right">{{ get_total_lista (lista_respuesta) | currency:'S/. ' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <table *ngIf="reporte_tipo === 'categorias'" class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Unidades</th>
+            <th scope="col">Precio</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of mapa_respuesta | keyvalue">
+            <td>
+              {{ get_nombre (item.key) }}
+            </td>
+            <td class="text-center">
+              {{ item.value.cantidad }}
+            </td>
+            <td class="text-center">
+              {{ item.value.precio | currency:'S/. ' }}
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="text-right" colspan="2">Total:</td><td class="right">{{ get_total_map () | currency:'S/. ' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </nb-card>
+  </nb-layout-column>
+</nb-layout>

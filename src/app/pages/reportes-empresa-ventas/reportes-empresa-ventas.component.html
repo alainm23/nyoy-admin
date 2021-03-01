@@ -1,0 +1,61 @@
+<nb-layout>
+  <nb-layout-column>
+    <nb-card>
+      <nb-card-header>
+        <h6>Ventas - {{ get_total_ventas () | currency:'S/. ' }}</h6>
+      </nb-card-header>
+
+      <nb-card-header>
+        <nb-select placeholder="Empresa" [(selected)]="empresa_reporte">
+          <nb-option *ngFor="let item of empresas" [value]="item">
+            {{ item.nombre }}
+          </nb-option>
+        </nb-select>
+        &nbsp;
+        &nbsp;
+        <nb-select *ngIf="empresa_reporte !== null" placeholder="Select Showcase" [(selected)]="reporte_tipo">
+          <nb-option value="diario">Reporte diario</nb-option>
+          <nb-option value="mensual">Reporte mensual</nb-option>
+        </nb-select>
+        &nbsp;
+        &nbsp;
+        <ng-container *ngIf="reporte_tipo === 'diario' && empresa_reporte !== null">
+          <input nbInput placeholder="Seleccione una fecha" [nbDatepicker]="dateTimePicker">
+          <nb-datepicker (dateChange)="fecha_changed ($event)" #dateTimePicker></nb-datepicker>
+        </ng-container>
+        &nbsp;
+        &nbsp;
+        <nb-select *ngIf="instancias.length > 0" placeholder="Seleccione una instancia" [(selected)]="instancia_seleccionada" (selectedChange)="instancia_cambia ($event)">
+          <nb-option *ngFor="let instancia of instancias" [value]="instancia">
+            {{ instancia.hora_apertura }} - <span *ngIf="instancia.hora_cierre === undefined"> ? </span><span *ngIf="instancia.hora_cierre !== undefined">{{ instancia.hora_cierre }}</span>
+          </nb-option>
+        </nb-select>
+      </nb-card-header>
+
+      <table class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th scope="col">N°</th>
+            <th scope="col">Hora</th>
+            <th scope="col">Producto</th>
+            <th scope="col">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let venta of ventas; let i = index">
+            <th scope="row">{{ i +1 }}</th>
+            <th>{{ venta.hora }}</th>
+            <th>
+              <ul *ngFor="let plato of venta.platos">
+                <li *ngIf="plato.tipo === 'plato'">
+                  {{ plato.nombre }}
+                </li>
+              </ul>
+            </th>
+            <th>{{ venta.monto_total | currency:'S/. ' }}</th>
+          </tr>
+        </tbody>
+      </table>
+    </nb-card>
+  </nb-layout-column>
+</nb-layout>

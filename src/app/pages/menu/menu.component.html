@@ -1,0 +1,199 @@
+<ng-template #dialog let-data let-ref="dialogRef">
+  <nb-card [nbSpinner]="loading">
+    <nb-card-header *ngIf="data === false">
+      Registrar
+    </nb-card-header>
+    <nb-card-header *ngIf="data === true">
+      Editar
+    </nb-card-header>
+
+    <nb-card-body>
+      <form [formGroup]="form">
+        <div class="form-group">
+          <label for="elemento_menu_id" class="label">Menu elemento:</label>
+          <nb-select formControlName="elemento_menu_id" id="elemento_menu_id" fullWidth>
+            <nb-option *ngFor="let item of elementos" [value]="item.id">
+              {{ item.nombre }}
+            </nb-option>
+          </nb-select>
+        </div>
+
+        <div class="form-group">
+          <label for="nombre" class="label">Nombre:</label>
+          <input type="text" formControlName="nombre" id="nombre" nbInput fullWidth>
+        </div>
+
+        <!-- <div class="form-group">
+          <div>
+            <label for="precio" class="label">Precio:</label>
+            &nbsp;
+            <nb-icon class="help-icon" icon="question-mark-outline"></nb-icon>
+          </div>
+          <input type="number" formControlName="precio" id="precio" nbInput fullWidth>
+        </div> -->
+        <!-- <div class="row">
+          <div class="col-6">
+
+          </div>
+          <div class="col-6">
+
+          </div>
+        </div> -->
+
+
+        <!-- <div class="form-group">
+          <div>
+            <label for="precio" class="label">Precio:</label>
+            &nbsp;
+            <nb-icon class="help-icon" icon="question-mark-outline"></nb-icon>
+          </div>
+          <input type="number" formControlName="precio" id="precio" nbInput fullWidth>
+        </div> -->
+      </form>
+    </nb-card-body>
+    <nb-card-footer>
+      <button nbButton (click)="cancelar (ref)">Cancelar</button>
+      &nbsp;&nbsp;
+      <button nbButton status="success" (click)="submit (ref, data)" [disabled]="!form.valid">Aceptar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<!-- <nb-card [nbSpinner]="loading">
+  <nb-card-header>
+    <div class="row align-items-center">
+      <div class="col-3">
+        <h5>Menu</h5>
+      </div>
+
+      <div class="col-3">
+        <input type="search" [(ngModel)]="search_text" nbInput fullWidth (ngModelChange)="filter ()" placeholder="Buscar menu...">
+      </div>
+
+      <div class="col-3">
+        <nb-select [(ngModel)]="elemento_filtro" id="elemento_menu_id" fullWidth (selectedChange)="filter ()">
+          <nb-option value="todos">
+            Todos
+          </nb-option>
+
+          <nb-option *ngFor="let item of elementos" [value]="item.id">
+            {{ item.nombre }}
+          </nb-option>
+        </nb-select>
+      </div>
+
+      <div class="col-3">
+        <button nbButton status="success" fullWidth (click)="registrar_dialog (dialog)">Registrar</button>
+      </div>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Nombre</th>
+          <!-- <th scope="col">Icono</th> -->
+          <!-- <th scope="col">Precio</th> -->
+          <!-- <th scope="col">Stock</th>
+          <th scope="col">Menu elemento</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of items">
+          <!-- <td>
+            {{ item.id }}
+          </td>
+
+          <td>
+            {{ item.data.nombre }}
+          </td>
+
+          <!-- <td>
+            {{ item.icono }}
+          </td> -->
+
+          <!-- <td>
+            {{ item.data.precio | currency:'S/. ' }}
+          </td> -->
+
+          <!-- <td>
+            {{ item.stock }}
+          </td>
+
+          <td>
+            {{ item.menu_elemento.nombre }}
+          </td>
+
+          <!-- <td>
+            {{ item.precio }}
+          </td>
+
+          <td style="display: flex;">
+            <button nbButton fullWidth size="small" ghost (click)="editar (item.data, dialog)">
+              <nb-icon status="primary" icon="edit-outline"></nb-icon>
+            </button>
+
+            <!-- <button nbButton fullWidth size="small" ghost (click)="delete (item.data)">
+              <nb-icon status="primary" icon="trash-outline"></nb-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </nb-card-body>
+</nb-card> -->
+
+<nb-card [nbSpinner]="loading">
+    <nb-card-header>
+      <div class="row align-items-center">
+        <div class="col-3">
+          <h5>Menus</h5>
+        </div>
+
+        <div class="col-6">
+          <input style="width: 100%;" nbInput [nbFilterInput]="dataSource" id="search" class="search-input" placeholder="Buscar menus...">
+        </div>
+
+        <div class="col-3">
+          <button nbButton status="success" fullWidth (click)="registrar_dialog (dialog)">Registrar</button>
+        </div>
+      </div>
+    </nb-card-header>
+
+    <table class="table table-striped" [nbTreeGrid]="dataSource" [nbSort]="dataSource" (sort)="updateSort($event)">
+
+      <tr nbTreeGridHeaderRow *nbTreeGridHeaderRowDef="allColumns"></tr>
+      <tr nbTreeGridRow *nbTreeGridRowDef="let row; columns: allColumns"></tr>
+
+      <ng-container [nbTreeGridColumnDef]="customColumn">
+        <th nbTreeGridHeaderCell [nbSortHeader]="getSortDirection(customColumn)" *nbTreeGridHeaderCellDef>
+          {{ customColumn }}
+        </th>
+        <td nbTreeGridCell *nbTreeGridCellDef="let row">
+          <nb-fs-icon [kind]="row.data.kind" [expanded]="row.expanded"></nb-fs-icon>
+          {{row.data [customColumn]}}
+        </td>
+      </ng-container>
+
+      <ng-container *ngFor="let column of defaultColumns; let index = index"
+                    [nbTreeGridColumnDef]="column"
+                    [showOn]="getShowOn(index)">
+        <th nbTreeGridHeaderCell [nbSortHeader]="getSortDirection(column)" *nbTreeGridHeaderCellDef>
+          {{column}}
+        </th>
+        <td nbTreeGridCell *nbTreeGridCellDef="let row">
+          <div *ngIf="row.data [column] !== 'accion'">
+            {{ row.data [column] }}
+          </div>
+
+          <div *ngIf="row.data [column] === 'accion'">
+            <button nbButton fullWidth size="small" ghost (click)="editar (row.data ['data'], dialog)">
+              <nb-icon status="primary" icon="edit-outline"></nb-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+    </table>
+</nb-card>

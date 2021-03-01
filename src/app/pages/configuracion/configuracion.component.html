@@ -1,0 +1,45 @@
+<nb-card [nbSpinner]="loading">
+  <nb-card-header>
+    <div class="row align-items-center">
+      <div class="col-9">
+        <h5>Configuraciones</h5>
+      </div>
+
+      <div class="col-3">
+        <button nbButton status="success" fullWidth [disabled]="!form.valid" (click)="guardar ()">Guardar</button>
+      </div>
+    </div>
+  </nb-card-header>
+
+  <nb-card-body>
+    <form [formGroup]="form">
+      <div class="row">
+        <div class="col-6">
+          <div class="form-group">
+            <label for="delivery_limite" class="label">Delivery Limite (Metros):</label>
+            <input type="number" formControlName="delivery_limite" id="delivery_limite" nbInput fullWidth>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-group">
+            <label for="delivery_precio" class="label">Delivery Precio (S/):</label>
+            <input type="number" formControlName="delivery_precio" id="delivery_precio" nbInput fullWidth>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="form-group">
+            <label for="local_latitud" class="label">Latitud (local):</label>
+            <input type="number" formControlName="local_latitud" id="local_latitud" nbInput fullWidth>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-group">
+            <label for="local_longitud" class="label">Longitud (local):</label>
+            <input type="number" formControlName="local_longitud" id="local_longitud" nbInput fullWidth>
+          </div>
+        </div>
+      </div>
+    </form>
+  </nb-card-body>
+</nb-card>

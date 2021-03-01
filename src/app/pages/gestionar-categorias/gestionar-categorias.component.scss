@@ -1,0 +1,19 @@
+.avatar-preview {
+  margin: 0 auto;
+  text-align: center;
+  width: 128px;
+  border: 1px solid #333;
+  height: 128px;
+}
+
+.avatar-image {
+  width: 128px;
+  height:128px;
+}
+
+.avatar-default {
+  background-image: url('../../../assets/graphics-editor.png');
+  background-repeat: no-repeat;
+  background-size: auto;
+  background-position: center;
+}

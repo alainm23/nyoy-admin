@@ -1,0 +1,467 @@
+<ng-template #dialog_abrir_caja let-data let-ref="dialogRef">
+  <nb-card [formGroup]="form_abrir_caja" [nbSpinner]="loading" autocomplete="off">
+    <nb-card-header>
+      <h6>Apertura de caja</h6>
+    </nb-card-header>
+
+    <nb-card-body>
+      <div class="form-group">
+        <label for="monto_apertura"><b>Monto de apertura</b></label>
+        <input formControlName="monto_apertura" nbInput fullWidth id="monto_apertura" type="number">
+      </div>
+
+      <div class="form-group">
+        <label for="admi_correo"><b>Correo</b></label>
+        <input formControlName="admi_correo" autocomplete="new-password" nbInput fullWidth id="admi_correo" type="email">
+      </div>
+      <div class="form-group">
+        <label for="admi_password"><b>Contraseña</b></label>
+        <input formControlName="admi_password" autocomplete="new-password" nbInput fullWidth id="admi_password" type="password">
+      </div>
+    </nb-card-body>
+
+    <nb-card-footer>
+      <button nbButton status="base" (click)="ref.close ()">Cerrar</button>
+      &nbsp;
+      <button nbButton status="success" [disabled]="form_abrir_caja.invalid" (click)="validar_admi (ref)">Aceptar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<ng-template #dialog_cobro let-data let-ref="dialogRef">
+  <nb-card [formGroup]="form_venta" [nbSpinner]="loading">
+    <nb-card-header>
+      <div class="row">
+        <div class="col-6">
+          <h6>Realizar pedido</h6>
+        </div>
+
+        <!-- <div class="col-6 text-right">
+          <nb-select placeholder="Seleccione una opcion" formControlName="tipo">
+            <nb-option value="rapido">Rapido</nb-option>
+            <nb-option value="completo">Completo</nb-option>
+          </nb-select>
+        </div> -->
+      </div>
+
+    </nb-card-header>
+
+    <nb-card-body>
+      <div class="text-center">
+        <h3>{{ get_total () | currency:'S/. ' }}</h3>
+      </div>
+      <br>
+      <div class="linked text-center">
+        <button
+          [status]="form_venta.value.tipo_pago === 'efectivo' ? 'primary' : 'basic'"
+          (click)="cambiar_tipo_pago ('efectivo')"
+          nbButton>
+          <nb-icon icon="npm-outline"></nb-icon>
+          Efectivo
+        </button>
+        <button
+          [status]="form_venta.value.tipo_pago === 'tarjeta' ? 'primary' : 'basic'"
+          (click)="cambiar_tipo_pago ('tarjeta')"
+          nbButton>
+          <nb-icon icon="credit-card-outline"></nb-icon>
+          Tarjeta de credito
+        </button>
+      </div>
+      <br>
+      <ng-container *ngIf="form_venta.value.tipo_pago === 'efectivo'">
+        <div>
+          <label><b>Pago con:</b></label>
+        </div>
+        <div class="linked">
+          <input nbInput fieldSize="medium" type="number" min="0" style="width: 120px;" formControlName="importe">
+          <button
+            [status]="form_venta.value.importe === 10 ? 'primary' : 'basic'"
+            (click)="form_venta.controls ['importe'].setValue (10)"
+            status="primary"
+            *ngIf="get_total () < 10"
+            nbButton>S/. 10
+          </button>
+          <button
+            [status]="form_venta.value.importe === 20 ? 'primary' : 'basic'"
+            (click)="form_venta.controls ['importe'].setValue (20)"
+            *ngIf="get_total () < 20"
+            nbButton>S/. 20
+          </button>
+          <button
+            [status]="form_venta.value.importe === 50 ? 'primary' : 'basic'"
+            (click)="form_venta.controls ['importe'].setValue (50)"
+            *ngIf="get_total () < 50"
+            nbButton>S/. 50
+          </button>
+          <button
+            [status]="form_venta.value.importe === 100 ? 'primary' : 'basic'"
+            (click)="form_venta.controls ['importe'].setValue (100)"
+            *ngIf="get_total () < 100"
+            nbButton>S/. 100
+          </button>
+          <button
+            [status]="form_venta.value.importe === 200 ? 'primary' : 'basic'"
+            (click)="form_venta.controls ['importe'].setValue (200)"
+            *ngIf="get_total () < 200"
+            nbButton>S/. 200
+          </button>
+        </div>
+        <br>
+        <div>
+          <label><b>Su cambio:</b></label>
+        </div>
+
+        <div *ngIf="calcular_cambio () < 0">
+          Ingrese un importe valido
+          <br>
+          <br>
+        </div>
+
+        <div *ngIf="calcular_cambio () > 0">
+          <h6>{{ calcular_cambio () | currency:'S/. ' }}</h6>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="form_venta.value.tipo_pago === 'tarjeta'">
+        <div>
+          <label><b>Codigo:</b></label>
+        </div>
+        <input nbInput fullWidth fieldSize="medium" type="text" formControlName="tarjeta_cod_ref">
+        <br>
+        <br>
+      </ng-container>
+
+      <!-- <div>
+        <nb-checkbox formControlName="imprimir_ticket">Imprimir ticket</nb-checkbox>
+      </div> -->
+
+      <br>
+      <!-- <div *ngIf="form_venta.value.tipo === 'completo'">
+        <div class="row">
+          <div class="col-4">
+            <div class="form-group">
+              <label for="tipo_comprobante"><b>Tipo de comprobante</b></label>
+              <nb-select fullWidth id="tipo_comprobante" placeholder="Seleccione una opcion" formControlName="tipo_comprobante">
+                <nb-option value="boleta">Boleta</nb-option>
+                <nb-option value="factura">Factura</nb-option>
+              </nb-select>
+            </div>
+          </div>
+
+          <div class="col-4">
+            <div class="form-group">
+              <label for="nro_comprobante"><b>N° de comprobante</b></label>
+              <input nbInput fullWidth id="nro_comprobante" formControlName="nro_comprobante" type="text">
+            </div>
+          </div>
+
+          <div class="col-4">
+            <div class="form-group">
+              <label for="cliente_nombre"><b>Nombre del cliente</b></label>
+              <input nbInput fullWidth id="cliente_nombre" formControlName="cliente_nombre" type="text">
+            </div>
+          </div>
+        </div>
+      </div> -->
+
+      <div>
+        <button nbButton status="success" [disabled]="validar_cobrar ()" (click)="submit (ref)" fullWidth>Cobrar</button>
+      </div>
+    </nb-card-body>
+  </nb-card>
+</ng-template>
+
+<ng-template #dialog_cerrar_caja let-data let-ref="dialogRef">
+  <nb-card>
+    <nb-card-header>
+      <div class="row">
+        <div class="col-6">
+          <h6>Cerrar caja</h6>
+        </div>
+
+        <!-- <div class="col-6 text-right">
+          <nb-toggle labelPosition="start" [(ngModel)]="ver_ventas">Ventas</nb-toggle>
+        </div> -->
+      </div>
+    </nb-card-header>
+
+    <nb-card-body [formGroup]="form_abrir_caja">
+      <div>
+        <div class="row">
+          <div class="col-6">
+            <div>
+              <label><b>Inicio de caja:</b> {{ empresa_pos.instancia_actual.monto_apertura | currency:'S/. ' }}</label>
+            </div>
+
+            <div>
+              <label><b>Total en caja:</b> {{ get_total_lista (data.ventas) + empresa_pos.instancia_actual.monto_apertura | currency:'S/. ' }}</label>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div>
+              <label><b>Venta total:</b> {{ get_total_lista (data.ventas) | currency:'S/. ' }}</label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="admi_correo"><b>Correo</b></label>
+          <input formControlName="admi_correo" nbInput fullWidth id="admi_correo" type="email">
+        </div>
+        <div class="form-group">
+          <label for="admi_password"><b>Contraseña</b></label>
+          <input formControlName="admi_password" nbInput fullWidth id="admi_password" type="password">
+        </div>
+      </div>
+    </nb-card-body>
+
+    <!-- <div *ngIf="ver_ventas" style="overflow-y: scroll; height: 300px;">
+      <table class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Fecha y Hora</th>
+            <th scope="col">Producto</th>
+            <th scope="col">Unidades</th>
+            <th scope="col">Precio</th>
+            <th scope="col">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let venta of data.ventas">
+            <tr *ngFor="let item of venta.productos">
+              <td>
+                {{ venta.fecha }} {{ venta.hora }}
+              </td>
+              <td>
+                {{ item.nombre }}
+              </td>
+              <td class="text-center">
+                {{ item.cantidad }}
+              </td>
+              <td>
+                {{ item.precio | currency:'S/. ' }}
+              </td>
+              <td>
+                {{ get_total_format (item.precio * item.cantidad) | currency:'S/. ' }}
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+        <tfoot>
+          <tr>
+              <td class="text-right" colspan="3">Total:</td><td class="right">{{ get_total_lista (data.ventas) | currency:'S/. ' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div> -->
+
+    <nb-card-footer>
+      <button nbButton status="base" (click)="ref.close ()">Cerrar</button>
+      &nbsp;
+      <button nbButton status="success" (click)="cerrar_caja (ref, data)">Aceptar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<nb-layout [nbSpinner]="loading">
+  <nb-layout-header>
+    <button *ngIf="empresa_pos.caja_abierta === false" nbButton status="primary" (click)="abrir_caja (dialog_abrir_caja)">
+      Abrir caja
+    </button>
+
+    <div *ngIf="empresa_pos.caja_abierta === true" style="display: grid;">
+      <span class="cajero-nombre"><b>Caja abierta</b></span>
+      <span class="cajero-tiempo">Conectado a: {{ empresa_pos?.instancia_actual.hora_apertura }} {{ empresa_pos?.instancia_actual.fecha_apertura }}</span>
+    </div>
+
+    <button *ngIf="empresa_pos.caja_abierta === true" nbButton [nbPopover]="templateRef" nbPopoverPlacement="bottom" ghost><nb-icon icon="settings-2-outline"></nb-icon></button>
+      <ng-template #templateRef>
+        <div style="display: table-caption;">
+          <button style="border-radius: 0px;" ghost nbButton (click)="confirmar_cerrar_caja (dialog_cerrar_caja)">
+            <nb-icon icon="close-circle-outline"></nb-icon>Cerrar caja
+          </button>
+        </div>
+      </ng-template>
+  </nb-layout-header>
+
+  <nb-layout-column>
+    <nb-card *ngIf="empresa_pos.caja_abierta === true && mesa_seleccionada === null" [nbSpinner]="mesas_loading">
+      <nb-card-header>
+        Seleccione una mesa
+      </nb-card-header>
+
+      <div class="row align-items-center justify-content-center">
+        <div class="col-3 mesa" *ngFor="let mesa of mesas" (click)="select_mesa (mesa)">
+          {{ mesa.nombre }}
+          <span *ngIf="mesa.disponible === true || mesa.disponible === undefined">Disponible</span>
+          <span *ngIf="mesa.disponible === false">No Disponible</span>
+        </div>
+      </div>
+    </nb-card>
+
+    <nb-card size="small" *ngIf="mesa_seleccionada !== null">
+      <nb-card-header>
+        Mesa: {{ mesa_seleccionada.nombre }}
+      </nb-card-header>
+
+      <nb-card-header style="display: flex; align-items: center;">
+        <div style="width: 100%;">Orden</div>
+      </nb-card-header>
+
+      <div style="height: 100%;">
+        <table class="table table-sm table-striped">
+          <thead>
+            <tr>
+              <th scope="col">N°</th>
+              <th scope="col">Tipo</th>
+              <th scope="col">Producto</th>
+              <th scope="col">Unidades</th>
+              <th scope="col">Precio</th>
+              <th scope="col">Total</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let plato of get_platos_format (mesa_seleccionada.platos)">
+              <th scope="row">{{ plato.orden }}</th>
+              <td>{{ get_tipo_plato_lista (plato.tipo) }}</td>
+              <td>
+                <div *ngIf="plato.tipo === 'menu-completo'">
+                  <p style="margin-bottom: 0px;">{{ plato.nombre }}</p>
+                  <ul>
+                    <li *ngFor="let menu of plato.menus">
+                      {{ menu.nombre }}
+                    </li>
+                  </ul>
+                </div>
+                <div *ngIf="plato.tipo !== 'menu-completo'">
+                  {{ plato.nombre }}
+                </div>
+              </td>
+              <td>
+                <ng-container *ngIf="plato.tipo === 'menu'">
+                  {{ plato.cantidad - plato.menus_completos }}
+                </ng-container>
+                <ng-container *ngIf="plato.tipo !== 'menu'">
+                  {{ plato.cantidad }}
+                </ng-container>
+                <button [disabled]="plato.cantidad <= 1" (click)="remove_plato (plato)">-</button>
+                <button (click)="add_plato_actualizar (plato)">+</button>
+              </td>
+              <td>
+                {{ plato.precio | currency:'S/. ' }}
+              </td>
+              <td>
+                {{ get_total_format (plato.precio * plato.cantidad) | currency:'S/. ' }}
+              </td>
+              <td class="text-right">
+                <button nbButton ghost size="small" status="danger" (click)="eliminar_producto (plato)">
+                  <nb-icon icon="close-outline"></nb-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <nb-card-footer style="display: flex; align-items: center;">
+        <button nbTooltip="Limpiar" nbButton outline status="danger" (click)="cancelar ()">
+          Atras
+        </button>
+
+        <!-- <button nbTooltip="Imprimir" style="margin-left: 1rem;" nbButton outline status="info" [disabled]="lista.size <= 0">
+          <nb-icon icon="printer"></nb-icon>
+        </button>
+
+        <button nbTooltip="Registrar nota de credito" style="margin-left: 1rem;" (click)="agregar_nota_credito ()" nbButton outline status="info" [disabled]="lista.size <= 0">
+          <nb-icon icon="file-text"></nb-icon>
+        </button> -->
+
+        <!-- <button nbTooltip="Registrar ingreso/egreso" style="margin-left: 1rem;" (click)="agregar_nota_credito ()" nbButton outline status="info" [disabled]="lista.size <= 0">
+          <nb-icon icon="plus-square"></nb-icon>
+        </button> -->
+
+        <div *ngIf="mesa_seleccionada.estado === 1" style="width: 100%;" class="text-right">
+          <button nbButton outline status="success" (click)="open_pago (dialog_cobro)">
+            Cobrar:
+            {{ get_total () | currency:'S/. ' }}
+          </button>
+        </div>
+
+        <div *ngIf="mesa_seleccionada.estado === 0" style="width: 100%;" class="text-right">
+          <button nbButton outline status="success" (click)="crear_pedido ()">
+            Agregar pedido
+            {{ get_total () | currency:'S/. ' }}
+          </button>
+        </div>
+      </nb-card-footer>
+    </nb-card>
+  </nb-layout-column>
+
+  <nb-layout-column>
+    <nb-card *ngIf="empresa_pos.caja_abierta === true && mesa_seleccionada !== null" [nbSpinner]="cartas_loading">
+      <nb-card-header style="display: flex; overflow: auto;">
+        <ng-container *ngFor="let carta of cartas">
+          <button (click)="seleccionar_carta (carta)" style="margin: 6px;" nbButton size="tiny">
+            {{ carta.data.nombre }}
+          </button>
+        </ng-container>
+      </nb-card-header>
+
+      <!-- <nb-list-item *ngIf="carta.data.tipo_carta === '0'" style="border: none;" (click)="agregar_menu_completo ()">
+        <button nbButton ghost status="primary">
+          <nb-icon icon="plus-outline"></nb-icon>
+        </button>
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        <nb-user name="Menu completo" showTitle=false shape="rectangle">
+        </nb-user>
+      </nb-list-item> -->
+
+      <nb-accordion *ngIf="carta.data.tipo_carta === '0'">
+        <nb-accordion-item *ngFor="let menu_dia of carta?.menus_dia">
+          <nb-accordion-item-header>{{ menu_dia.data.nombre }}</nb-accordion-item-header>
+          <nb-accordion-item-body>
+            <nb-list-item style="border: none; padding: 0px;" *ngFor="let menu of menu_dia.menus_dia">
+              <button nbButton ghost status="primary" (click)="add_menu_dia_carrito (menu)">
+                <nb-icon icon="plus-outline"></nb-icon>
+              </button>
+              &nbsp;
+              &nbsp;
+              &nbsp;
+              <nb-user [name]="menu.menu_nombre" showTitle=false shape="rectangle">
+              </nb-user>
+            </nb-list-item>
+          </nb-accordion-item-body>
+        </nb-accordion-item>
+      </nb-accordion>
+
+      <nb-list *ngIf="carta.data.tipo_carta === '1'">
+        <nb-list-item *ngFor="let plato of carta.platos">
+          <button nbButton ghost status="primary" (click)="add_plato (plato.id)">
+            <nb-icon icon="plus-outline"></nb-icon>
+          </button>
+          &nbsp;
+          &nbsp;
+          &nbsp;
+          <nb-user [name]="plato.nombre" showTitle=false [picture]="plato.imagen" shape="rectangle">
+          </nb-user>
+        </nb-list-item>
+      </nb-list>
+
+      <nb-list *ngIf="carta.data.tipo_carta === '2'">
+        <nb-list-item *ngFor="let plato of carta.promociones">
+          <button nbButton ghost status="primary" (click)="add_promocion (plato [0])">
+            <nb-icon icon="plus-outline"></nb-icon>
+          </button>
+          &nbsp;
+          &nbsp;
+          &nbsp;
+          <nb-user [name]="plato [0].nombre" showTitle=false [picture]="plato[0].imagen" shape="rectangle">
+          </nb-user>
+        </nb-list-item>
+      </nb-list>
+    </nb-card>
+  </nb-layout-column>
+</nb-layout>

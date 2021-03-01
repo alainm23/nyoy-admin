@@ -1,0 +1,523 @@
+<ng-template #dialog let-data let-ref="dialogRef">
+  <nb-card [nbSpinner]="loading">
+    <nb-card-header *ngIf="data === false">
+      Registrar
+    </nb-card-header>
+    <nb-card-header *ngIf="data === true">
+      Editar
+    </nb-card-header>
+
+    <nb-card-body>
+      <form [formGroup]="form">
+        <div class="form-group">
+          <label for="tipo_carta" class="label">Tipo de carta:</label>
+          <nb-select formControlName="tipo_carta" id="tipo_carta" fullWidth (selectedChange)="tipoCartaChanged ($event, data)">
+            <nb-option value='0'>Menu</nb-option>
+            <nb-option value='1'>Extra</nb-option>
+            <nb-option value='2'>Promoción</nb-option>
+          </nb-select>
+        </div>
+
+        <div class="row" *ngIf="data.tipo_carta == '0'">
+          <div class="col-6 offset-3">
+            <div [className]="avatar_preview === null ? 'avatar-preview avatar-default' : 'avatar-preview'">
+              <img *ngIf="avatar_preview !== null" class="avatar-image" [src]="avatar_preview">
+            </div>
+
+            <div class="" (click)="fileInput.click ()">
+              <button style="margin-top: 1rem;" fullWidth size="tiny" nbButton>Seleccionar</button>
+              <input hidden type="file" accept="image/*" #fileInput (change)="change_menu_Listener ($event)">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="nombre" class="label">Nombre:</label>
+          <input type="text" formControlName="nombre" id="nombre" nbInput fullWidth>
+        </div>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label for="precio" class="label">Precio:</label>
+              <input type="number" formControlName="precio" id="precio" nbInput fullWidth>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label for="correo" class="label">Orden:</label>
+              <input type="number" formControlName="orden" id="orden" nbInput fullWidth>
+            </div>
+          </div>
+        </div>
+      </form>
+    </nb-card-body>
+    <nb-card-footer style="text-align: end;">
+      <button nbButton (click)="cancelar (ref)">Cancelar</button>
+      &nbsp;&nbsp;
+      <button nbButton status="success" (click)="submit (ref, data)" [disabled]="!form.valid">Aceptar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<ng-template #dialog_menu_dia let-data let-ref="dialogRef">
+  <nb-card [nbSpinner]="loading">
+    <nb-card-header>
+      Registrar
+    </nb-card-header>
+
+    <nb-card-body>
+      <form [formGroup]="form_menu_dia">
+        <div *ngIf="data.tipo === 'menu'" class="form-group">
+          <label for="menu_id" class="label">{{ data.menu.nombre }}:</label>
+          <nb-select formControlName="menu_id" id="menu_id" fullWidth (selectedChange)="menu_changed (data.tipo)">
+            <nb-option *ngFor="let item of data.menus" [value]=item.data.id>
+              {{ item.data.nombre }}
+            </nb-option>
+          </nb-select>
+        </div>
+
+        <div *ngIf="data.tipo !== 'menu'" class="form-group">
+          <label for="menu_id" class="label">Desde el almacen:</label>
+          <nb-select formControlName="menu_id" id="menu_id" fullWidth (selectedChange)="menu_changed (data.tipo)">
+            <nb-option *ngFor="let item of almacen_insumos" [value]="item.data.id">
+              {{ item.insumo.nombre }}
+            </nb-option>
+          </nb-select>
+        </div>
+
+        <div *ngIf="data.tipo === 'menu'" class="form-group">
+          <label for="stock" class="label">Cantidad a vender:</label>
+          <input type="number" min="1" formControlName="stock" id="stock" nbInput fullWidth>
+        </div>
+
+        <!-- <div class="form-group">
+          <label for="precio" class="label">Precio:</label>
+          <input type="number" formControlName="precio" id="precio" nbInput fullWidth>
+        </div> -->
+      </form>
+    </nb-card-body>
+    <nb-card-footer style="text-align: end;">
+      <button nbButton (click)="cancelar (ref)">Cancelar</button>
+      &nbsp;&nbsp;
+      <button nbButton status="success" (click)="submit_menu_dia (ref, data)" [disabled]="!form_menu_dia.valid">Aceptar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<ng-template #dialog_registrar_promocion let-data let-ref="dialogRef">
+  <nb-card [nbSpinner]="loading" style="overflow-y: scroll; height: -webkit-fill-available; max-height: 500px;">
+    <nb-card-header>
+      Registrar
+    </nb-card-header>
+
+    <nb-card-body>
+      <form [formGroup]="form_promocion">
+        <div class="form-group">
+          <label for="tipo_promocion" class="label">Tipo de promocion:</label>
+          <nb-select id="tipo_promocion" formControlName="tipo_promocion" fullWidth (selectedChange)="tipo_promocion_changed ()" placeholder="Tipo de promocion">
+            <nb-option value='0'>Promocionar un plato</nb-option>
+            <nb-option value='1'>Armar un combo</nb-option>
+          </nb-select>
+        </div>
+
+        <div class="row" *ngIf="form_promocion.value.tipo_promocion === '1'">
+          <div class="col-6 offset-3">
+            <div [className]="avatar_preview === null ? 'avatar-preview avatar-default' : 'avatar-preview'">
+              <img *ngIf="avatar_preview !== null" class="avatar-image" [src]="avatar_preview">
+            </div>
+
+            <div class="" (click)="fileInput.click ()">
+              <button style="margin-top: 1rem;" fullWidth size="tiny" nbButton>Seleccionar</button>
+              <input hidden type="file" accept="image/*" #fileInput (change)="change_combo_Listener ($event)">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="nombre" class="label">Nombre:</label>
+          <input type="text" min=1 formControlName="nombre" id="nombre" nbInput fullWidth>
+        </div>
+
+        <div class="form-group">
+          <label for="descripcion" class="label">Descripcion:</label>
+          <textarea nbInput formControlName="descripcion" id="descripcion" fullWidth></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="descuento" class="label">Descuento:</label>
+          <input type="number" min=1 formControlName="descuento" id="descuento" nbInput fullWidth>
+        </div>
+
+        <div *ngIf="form_promocion.value.tipo_promocion === '0'">
+          <div class="form-group">
+            <label for="plato_id" class="label">Seleccionar un plato:</label>
+            <nb-select id="plato_id" formControlName="plato_id" fullWidth>
+              <nb-option *ngFor="let plato of all_platos" [value]=plato>
+                <ng-container *ngIf="plato.empresa_id === empresa_id">
+                  {{ plato.nombre }}
+                </ng-container>
+              </nb-option>
+            </nb-select>
+          </div>
+
+          <div class="form-group">
+            <b>Precio:</b> {{ form_promocion.value?.plato_id.precio | currency:'S/. ' }}
+          </div>
+          <div class="form-group">
+            <b>Descuento:</b> ({{ form_promocion.value?.descuento }}%): {{ form_promocion.value?.plato_id.precio - (form_promocion.value?.plato_id.precio * (form_promocion.value?.descuento / 100)) }}
+          </div>
+        </div>
+      </form>
+
+      <div *ngIf="form_promocion.value.tipo_promocion == 1">
+        <div class="form-group">
+          <label for="plato_selected" class="label">Registrar un plato:</label>
+          <nb-select id="plato_selected" [(ngModel)]="plato_selected" fullWidth (selectedChange)="plato_selected_changed ($event)">
+            <nb-option *ngFor="let plato of all_platos" [value]=plato>
+              {{ plato.nombre }}
+            </nb-option>
+          </nb-select>
+        </div>
+
+        <div class="form-group">
+          <label for="plato_selected" class="label">Registrar un insumo:</label>
+          <nb-select id="plato_selected" [(ngModel)]="insumo_selected" fullWidth (selectedChange)="insumo_selected_changed ($event)">
+            <nb-option *ngFor="let insumo of almacen_insumos" [value]=insumo>
+              {{ insumo.insumo.nombre }}
+            </nb-option>
+          </nb-select>
+        </div>
+
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th scope="col">Nombre</th>
+              <th scope="col">Precio</th>
+              <th scope="col">Con descuento ({{ form_promocion.value.descuento }}%)</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of combo_list">
+              <th scope="row">{{ item.nombre }}</th>
+              <td>{{ item.precio }}</td>
+              <td>{{ item.precio - (item.precio * (form_promocion.value.descuento / 100)) }}</td>
+              <td>
+                <nb-icon status="danger" icon="close-outline" (click)="remove_plato_promocion (item)"></nb-icon>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </nb-card-body>
+    <nb-card-footer style="text-align: end;">
+      <button nbButton (click)="cancelar (ref)">Cancelar</button>
+      &nbsp;&nbsp;
+      <button nbButton status="success" (click)="registrar_promocion (ref, data)" [disabled]="!form_promocion.valid">Aceptar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<nb-layout>
+  <nb-layout-column>
+    <nb-card *ngIf="vista === 'principal'" [nbSpinner]="loading">
+      <nb-card-header>
+        <div class="row align-items-center">
+          <div class="col-1">
+            <button nbButton fullWidth size="small" ghost [routerLink]="'/pages/home'">
+              <nb-icon status="primary" icon="arrow-ios-back-outline"></nb-icon>
+            </button>
+          </div>
+
+          <div class="col-8">
+            <h5>Cartas: {{ empresa?.nombre }}</h5>
+          </div>
+
+          <div class="col-3">
+            <button nbButton status="success" fullWidth (click)="registrar_dialog (dialog)">Registrar</button>
+          </div>
+        </div>
+      </nb-card-header>
+
+      <nb-card-body>
+        <div class="row">
+          <div class="col-6" *ngFor="let carta of items | orderBy: orden">
+            <nb-card>
+              <nb-card-header>
+                <div class="row">
+                  <div class="col-8">
+                    <img style="width: 32px;" *ngIf="carta.data.tipo_carta === '0'" [src]="carta.data.imagen">
+                    {{ carta.data.nombre }}
+                  </div>
+
+                  <div class="col-4">
+                    <span *ngIf="carta.data.tipo_carta === '0'">
+                      {{ carta.data.precio | currency:'S/. ' }}
+                    </span>
+                  </div>
+                </div>
+              </nb-card-header>
+
+              <div *ngIf="carta.data.tipo_carta === '0'">
+                <nb-list *ngFor="let menu of menu_elementos">
+                  <nb-list-item style="background-color: #d4d3d1; display: flow-root;">
+                    {{ menu.nombre }}
+                    &nbsp;
+                    ({{ menu.precio | currency:'S/. ' }})
+                    <nb-icon class="plus-button" icon="plus-outline" (click)="registrar_menu_dia (carta.data, menu, dialog_menu_dia, 'menu')"></nb-icon>
+                  </nb-list-item>
+
+                  <nb-list-item style="display: flow-root;" *ngFor="let menu_dia of get_menus (carta.data, menu, 'menu')">
+                    <div class="row">
+                      <div class="col-10">
+                        {{ menu_dia.stock }} Unid. - {{ menu_dia.menu_nombre }}
+                      </div>
+
+                      <div class="col-2">
+                        <nb-icon (click)="eliminar_menu_dia (menu_dia)" status="danger" icon="close-outline"></nb-icon>
+                      </div>
+                    </div>
+                  </nb-list-item>
+                </nb-list>
+              </div>
+
+              <div *ngIf="carta.data.tipo_carta === '1'">
+                <div *ngFor="let plato of carta.platos | orderBy: orden">
+                  <div class="row" style="align-items: center; padding: 12px;">
+                    <div class="col-3">
+                      <img style="width: 64px; height: auto;" [src]="plato.imagen">
+                    </div>
+
+                    <div class="col-5">
+                      {{ plato.nombre }}
+                    </div>
+
+                    <div class="col-1" style="text-align: end; padding-right: 0px;" (click)="editar_plato (plato)">
+                      <nb-icon status="primary" icon="edit-outline"></nb-icon>
+                    </div>
+
+                    <div class="col-1" (click)="cambiar_estado_plato (plato)">
+                      <nb-icon *ngIf="plato.habilitado" status="success" title="Click para deshabilitar" icon="eye-outline"></nb-icon>
+                      <nb-icon *ngIf="!plato.habilitado" status="danger" title="Click para habilitar" icon="eye-off-outline"></nb-icon>
+                    </div>
+
+                    <div class="col-1" (click)="eliminar_plato_validar (plato)">
+                      <nb-icon status="danger" icon="trash-2-outline"></nb-icon>
+                    </div>
+                  </div>
+                </div>
+
+                <nb-list-item style="background-color: #d4d3d1;">
+                  Extras
+                  <nb-icon class="plus-button" icon="plus-outline" (click)="registrar_menu_dia (carta.data, null, dialog_menu_dia, 'extras')"></nb-icon>
+                </nb-list-item>
+
+                <nb-list-item *ngFor="let menu_dia of get_menus (carta.data, null, 'extras')">
+                  <div class="row">
+                    <div class="col-10">
+                      {{ menu_dia.stock }} Unid. - {{ menu_dia.menu_nombre }}<br>{{ menu_dia.precio | currency:'S/. ' }}
+                    </div>
+
+                    <div class="col-2">
+                      <nb-icon (click)="eliminar_menu_dia (menu_dia)" status="danger" icon="close-outline"></nb-icon>
+                    </div>
+                  </div>
+                </nb-list-item>
+              </div>
+
+              <nb-list *ngIf="carta.data.tipo_carta === '2'">
+                <nb-list-item *ngFor="let promocion of get_promociones_by_carta (carta.data.id)">
+                  <div class="row" style="display: contents;">
+                    <div class="col-3">
+                      <img style="width: 48px;" *ngIf="promocion.tipo === '1'"[src]="promocion.imagen">
+                      <img style="width: 48px;" *ngIf="promocion.tipo === '0'"[src]="promocion.plato.imagen">
+                    </div>
+                    <div class="col-7">
+                      {{ promocion.nombre }} {{ promocion.precio_total }}
+                    </div>
+
+                    <div class="col-2">
+                      <nb-icon status="danger" (click)="eliminar_promocion (promocion)" icon="close-outline"></nb-icon>
+                    </div>
+                  </div>
+                </nb-list-item>
+              </nb-list>
+
+              <nb-card-footer style="display: inline-flex;">
+                <button *ngIf="carta.data.tipo_carta === '2'" title="Crear combo" nbButton fullWidth size="small" ghost (click)="abrir_registrar_promocion (dialog_registrar_promocion, carta.data)">
+                  <nb-icon status="primary" icon="plus-outline"></nb-icon>
+                </button>
+
+                <button *ngIf="carta.data.tipo_carta === '0'" nbButton fullWidth size="small" ghost>
+                  <nb-icon status="primary" icon="book-open-outline"></nb-icon>
+                </button>
+
+                <button *ngIf="carta.data.tipo_carta === '1'" nbButton fullWidth size="small" ghost (click)="vista_registrar_plato (carta.data)">
+                  <nb-icon status="primary" icon="plus-outline"></nb-icon>
+                </button>
+
+                <button nbButton fullWidth size="small" ghost (click)="editar (carta.data, dialog)">
+                  <nb-icon status="primary" icon="edit-outline"></nb-icon>
+                </button>
+
+                <button nbButton fullWidth size="small" ghost (click)="cambiar_estado (carta.data)">
+                  <nb-icon *ngIf="carta.data.habilitado" status="success" title="Click para deshabilitar" icon="eye-outline"></nb-icon>
+                  <nb-icon *ngIf="!carta.data.habilitado" status="danger" title="Click para habilitar" icon="eye-off-outline"></nb-icon>
+                </button>
+
+                <button nbButton fullWidth size="small" ghost (click)="eliminar_carta_validar (carta)">
+                  <nb-icon status="danger" icon="trash-2-outline"></nb-icon>
+                </button>
+              </nb-card-footer>
+            </nb-card>
+          </div>
+        </div>
+      </nb-card-body>
+    </nb-card>
+
+    <nb-card *ngIf="vista === 'registrar'" [nbSpinner]="loading">
+      <nb-card-header>
+        <div class="row align-items-center">
+          <div class="col-1">
+            <button nbButton fullWidth size="small" ghost (click)="regresar_principal ()">
+              <nb-icon status="primary" icon="arrow-ios-back-outline"></nb-icon>
+            </button>
+          </div>
+
+          <div class="col-8">
+            <h5 *ngIf="plato_editar === false">Registrar Plato</h5>
+            <h5 *ngIf="plato_editar === true">Editar Plato</h5>
+          </div>
+
+          <div class="col-3">
+            <button nbButton status="success" fullWidth (click)="submit_plato ()" [disabled]="!form_plato.valid || para_agregar.length <= 0">Continuar</button>
+          </div>
+        </div>
+      </nb-card-header>
+
+      <nb-card-body>
+        <form [formGroup]="form_plato">
+          <div class="row">
+            <div class="col-6 offset-3">
+              <div [className]="avatar_preview === null ? 'avatar-preview avatar-default' : 'avatar-preview'">
+                <img *ngIf="avatar_preview !== null" class="avatar-image" [src]="avatar_preview">
+              </div>
+
+              <div class="" (click)="fileInput.click ()">
+                <button style="margin-top: 1rem;" fullWidth size="tiny" nbButton>Seleccionar</button>
+                <input hidden type="file" accept="image/*" #fileInput (change)="changeListener ($event)">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="nombre" class="label">Nombre:</label>
+            <input type="text" min="1" formControlName="nombre" id="nombre" nbInput fullWidth>
+          </div>
+
+          <div class="form-group">
+            <label for="resumen" class="label">Resumen:</label>
+            <textarea nbInput formControlName="resumen" id="resumen" fullWidth></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="descripcion" class="label">Descripcion:</label>
+            <textarea nbInput formControlName="descripcion" id="descripcion" fullWidth></textarea>
+          </div>
+
+          <div class="row">
+            <div class="col-6">
+              <div class="form-group">
+                <label for="precio" class="label">Precio:</label>
+                <input type="number" min="1" formControlName="precio" id="precio" nbInput fullWidth>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <div class="form-group">
+                <label for="orden" class="label">Orden:</label>
+                <input type="number" min="1" formControlName="orden" id="orden" nbInput fullWidth>
+              </div>
+            </div>
+          </div>
+
+          <!-- <nb-toggle formControlName="es_adicional" labelPosition="start">Es adicional</nb-toggle> -->
+          <!-- &nbsp; -->
+          <nb-toggle formControlName="habilitado" labelPosition="start">Habilitado</nb-toggle>
+        </form>
+      </nb-card-body>
+
+      <h5 style="margin-left: 1rem;">Ingredientes</h5>
+
+      <div class="row">
+        <div class="col-3">
+          <input #autoInput
+            style="width: 100%; margin: 12px;"
+            [(ngModel)]="search_text"
+            nbInput
+            type="text"
+            (ngModelChange)="onChange ()"
+            placeholder="Buscar un insumo..."/>
+
+          <div *ngFor="let item of insumos" style="margin-left: 12px; padding: 6px;">
+            <div class="row">
+              <div class="col-8">
+                {{ item.data.nombre }}
+              </div>
+
+              <div class="col-4">
+                <button nbButton fullWidth size="small" ghost (click)="agregar_para_agregar (item.data)">
+                  <nb-icon status="primary" icon="arrowhead-right-outline"></nb-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-9" style="padding-right: 27px;">
+          <table class="table table-bordered table-striped" style="margin-top: 12px;">
+            <thead>
+              <tr>
+                <th scope="col">Nombre</th>
+                <th scope="col">Cantidad</th>
+                <th scope="col">Unidad medida</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let item of para_agregar">
+                <td>
+                  {{ item.nombre }}
+                </td>
+
+                <td>
+                  <input style="width: 78px;" min="0" type="number" nbInput [(ngModel)]="item.cantidad">
+                </td>
+
+                <td>
+                  {{ item.unidad_medida }}
+                </td>
+
+                <td style="width: 12px;">
+                  <nb-icon status="danger" icon="close-outline" (click)="remove (item)"></nb-icon>
+                </td>
+              </tr>
+
+              <!-- <tr *ngIf="get_precio_total () > 0">
+                <td colspan="3">&nbsp;</td>
+                <td>
+                  {{ get_precio_total () | currency:'S/. ' }}
+                </td>
+                <td></td>
+              </tr> -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </nb-card>
+  </nb-layout-column>
+</nb-layout>
+
+

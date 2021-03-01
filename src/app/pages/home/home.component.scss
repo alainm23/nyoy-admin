@@ -1,0 +1,42 @@
+.uploadfilecontainer {
+  background-image: url('../../../assets/graphics-editor.png');
+  background-repeat: no-repeat;
+  background-size: auto;
+  background-position: center;
+  height: 200px;
+  width: 80%;
+  margin: 20px auto;
+  border: 2px dashed #1C8ADB;
+  border-radius: 10px;
+}
+
+.uploadfilecontainer:hover {
+  cursor: pointer;
+  background-color: #9ecbec !important;
+  opacity: 0.8;
+}
+
+.avatar-default {
+  background-image: url('../../../assets/graphics-editor.png');
+  background-repeat: no-repeat;
+  background-size: auto;
+  background-position: center;
+}
+
+.avatar-preview {
+  margin: 0 auto;
+  text-align: center;
+  width: 64px;
+  border: 1px solid #333;
+  height: 64px;
+}
+
+.avatar-image {
+  width: 64px;
+  height: 64px;
+}
+
+.header-image {
+  width: 32px;
+  height: 32px;
+}

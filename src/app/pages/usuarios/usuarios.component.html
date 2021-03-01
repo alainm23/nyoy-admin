@@ -1,0 +1,142 @@
+<ng-template #dialog let-data let-ref="dialogRef">
+  <nb-card [nbSpinner]="loading">
+    <nb-card-header *ngIf="data === false">
+      Registrar
+    </nb-card-header>
+    <nb-card-header *ngIf="data === true">
+      Editar
+    </nb-card-header>
+
+    <nb-card-body>
+      <form [formGroup]="form">
+        <div class="form-group">
+          <label for="nombre" class="label">Nombre:</label>
+          <input type="text" formControlName="nombre" id="nombre" nbInput fullWidth>
+        </div>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label for="direccion" class="label">Direccion:</label>
+              <input type="text" formControlName="direccion" id="direccion" nbInput fullWidth>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label for="tipo" class="label">Tipo de usuario:</label>
+              <nb-select formControlName="tipo" id="tipo" fullWidth (selectedChange)="change ($event)">
+                <nb-option value=0>Administrador</nb-option>
+                <nb-option value=1>Repartidor</nb-option>
+                <nb-option value=-1>Cajero</nb-option>
+                <nb-option value=-3>Cajero Restaurante</nb-option>
+                <nb-option value=-2>POS (Punto de venta)</nb-option>
+              </nb-select>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="form.value.tipo === '-3'" class="form-group">
+          <label for="tipo" class="label">Empresa:</label>
+          <nb-select formControlName="empresa_id" id="tipo" fullWidth>
+            <nb-option *ngFor="let item of empresas" [value]=item.id>
+              {{ item.nombre }}
+            </nb-option>
+          </nb-select>
+        </div>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label for="correo" class="label">Correo:</label>
+              <input type="email" formControlName="correo" id="correo" nbInput fullWidth>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label for="password" class="label">Contraseña:</label>
+              <input type="password" formControlName="password" id="password" nbInput fullWidth>
+            </div>
+          </div>
+        </div>
+      </form>
+    </nb-card-body>
+    <nb-card-footer>
+      <button nbButton (click)="cancelar (ref)">Cancelar</button>
+      &nbsp;&nbsp;
+      <button nbButton status="success" (click)="submit (ref, data)" [disabled]="form.invalid">Aceptar</button>
+    </nb-card-footer>
+  </nb-card>
+</ng-template>
+
+<nb-layout>
+  <nb-layout-column>
+    <nb-card [nbSpinner]="loading">
+      <nb-card-body>
+        <nb-card-header>
+          <div class="row align-items-center">
+            <div class="col-3">
+              <h5>Usuarios</h5>
+            </div>
+
+            <div class="col-6">
+              <input style="width: 100%;" nbInput [nbFilterInput]="dataSource" id="search" class="search-input" placeholder="Buscar usuario...">
+            </div>
+
+            <div class="col-3">
+              <button nbButton status="success" fullWidth (click)="registrar_dialog (dialog)">Registrar</button>
+            </div>
+          </div>
+        </nb-card-header>
+
+        <table class="table table-striped" [nbTreeGrid]="dataSource" [nbSort]="dataSource" (sort)="updateSort($event)">
+          <tr nbTreeGridHeaderRow *nbTreeGridHeaderRowDef="allColumns"></tr>
+          <tr nbTreeGridRow *nbTreeGridRowDef="let row; columns: allColumns"></tr>
+
+          <ng-container [nbTreeGridColumnDef]="customColumn">
+            <th nbTreeGridHeaderCell [nbSortHeader]="getSortDirection(customColumn)" *nbTreeGridHeaderCellDef>
+              {{ customColumn }}
+            </th>
+            <td nbTreeGridCell *nbTreeGridCellDef="let row">
+              <nb-fs-icon [kind]="row.data.kind" [expanded]="row.expanded"></nb-fs-icon>
+              {{row.data [customColumn]}}
+            </td>
+          </ng-container>
+
+          <ng-container *ngFor="let column of defaultColumns; let index = index"
+                        [nbTreeGridColumnDef]="column"
+                        [showOn]="getShowOn(index)">
+            <th nbTreeGridHeaderCell [nbSortHeader]="getSortDirection(column)" *nbTreeGridHeaderCellDef>
+              {{column}}
+            </th>
+            <td nbTreeGridCell *nbTreeGridCellDef="let row">
+              <container-element [ngSwitch]="column">
+                <some-element *ngSwitchCase="'Habilitado'">
+                  <button nbButton fullWidth size="small" ghost (click)="update_usuario (row.data.data)">
+                    {{ row.data [column] }}
+                    <nb-icon status="primary" icon="edit-outline"></nb-icon>
+                  </button>
+                </some-element>
+                <some-element *ngSwitchCase="'Acciones'">
+                  <button nbButton fullWidth size="small" ghost (click)="editar (row.data ['data'], dialog)">
+                    <nb-icon status="primary" icon="edit-outline"></nb-icon>
+                  </button>
+                </some-element>
+                <some-element *ngSwitchDefault>
+                  {{ row.data [column] }}
+                </some-element>
+              </container-element>
+              <!-- <div *ngIf="row.data [column] !== 'accion'">
+                <span *ngIf="column === 'Precio'">{{ row.data [column] | currency:'S/. ' }}</span>
+              <span *ngIf="column !== 'Precio'"></span>
+              </div>
+
+              <div *ngIf="row.data [column] === 'accion'">
+
+              </div> -->
+            </td>
+          </ng-container>
+        </table>
+      </nb-card-body>
+    </nb-card>
+  </nb-layout-column>
+</nb-layout>

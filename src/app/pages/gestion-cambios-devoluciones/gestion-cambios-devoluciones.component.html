@@ -1,0 +1,138 @@
+<nb-layout>
+  <nb-layout-column>
+    <nb-card *ngIf="es_usuario_valido">
+      <nb-card-header>
+        POS:
+        &nbsp;
+        &nbsp;
+        <nb-select [(ngModel)]="pos_seleccionado" placeholder="Seleccione una opcion">
+          <nb-option *ngFor="let item of pos" [value]="item">
+            {{ item.nombre }}
+          </nb-option>
+        </nb-select>
+        &nbsp;
+        &nbsp;
+        Fecha:
+        &nbsp;
+        &nbsp;
+        <input type="date" [(ngModel)]="fecha_seleccionada" nbInput>
+        &nbsp;
+        &nbsp;
+        Codigo:
+        &nbsp;
+        &nbsp;
+        <input type="text" nbInput [(ngModel)]="codigo">
+        &nbsp;
+        &nbsp;
+        <button nbButton (click)="buscar_venta ()">Buscar</button>
+      </nb-card-header>
+      <br>
+      <h6 *ngIf="venta?.id !== undefined" style="margin-left: 1rem;">Lista de productos</h6>
+      <table *ngIf="venta?.id !== undefined" class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">Hora</th>
+            <th scope="col">Producto</th>
+            <th scope="col">Unidades</th>
+            <th scope="col">Cajero</th>
+            <th scope="col">Precio</th>
+            <th scope="col">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of venta?.productos">
+            <td>
+              <nb-checkbox (change)="verificar_producto ($event, item)" status="basic">
+                Devolver
+              </nb-checkbox>
+            </td>
+            <td>
+              {{ venta.hora }}
+            </td>
+            <td>
+              {{ item.nombre }}
+            </td>
+            <td class="text-center">
+              {{ item.cantidad }}
+            </td>
+            <td>
+              {{ venta.cajero_nombre }}
+            </td>
+            <td>
+              {{ item.precio | currency:'S/. ' }}
+            </td>
+            <td>
+              {{ get_total_format (item.precio * item.cantidad) | currency:'S/. ' }}
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="text-right" colspan="6">Total:</td><td class="right">{{ get_total_lista (venta?.productos) | currency:'S/. ' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+      <br>
+      <h6 *ngIf="lista_devolucion.size > 0" style="margin-left: 1rem;">Devolver</h6>
+      <table *ngIf="lista_devolucion.size > 0" class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Producto</th>
+            <th scope="col">Unidades</th>
+            <th scope="col">Devolucion</th>
+            <th scope="col">Precio</th>
+            <th scope="col">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of lista_devolucion | keyvalue">
+            <td>
+              {{ item.value.nombre }}
+            </td>
+            <td class="text-center">
+              {{ item.value.cantidad }}
+            </td>
+            <td class="text-center">
+              <input type="number" [(ngModel)]="item.value.devolucion" [max]="item.value.cantidad" min="0">
+            </td>
+
+            <td>
+              {{ item.value.precio | currency:'S/. ' }}
+            </td>
+            <td>
+              {{ get_total_format (item.value.precio * item.value.devolucion) | currency:'S/. ' }}
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="text-right" colspan="4">Total:</td><td class="right">{{ get_total_devolucion () | currency:'S/. ' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+      <nb-card-footer *ngIf="get_total_devolucion () > 0">
+        <button nbButton (click)="generar ()">Generar nota de credito</button>
+      </nb-card-footer>
+    </nb-card>
+
+    <nb-card *ngIf="es_usuario_valido === false">
+      <nb-card-body>
+        <form [formGroup]="form" (ngSubmit)="validar_usuario ()">
+          <div style="display: grid;" class="form-group">
+            <label for="nombre" class="label">Nombre:</label>
+            <input type="email" nbInput formControlName="email" placeholder="Correo">
+          </div>
+
+          <div style="display: grid;" class="form-group">
+            <label for="nombre" class="label">Nombre:</label>
+            <input type="password" nbInput formControlName="password" placeholder="Contraseña">
+          </div>
+        </form>
+      </nb-card-body>
+      <nb-card-footer>
+        <button nbButton (click)="validar_usuario ()" [disabled]="form.invalid">Ingresar</button>
+      </nb-card-footer>
+    </nb-card>
+  </nb-layout-column>
+</nb-layout>

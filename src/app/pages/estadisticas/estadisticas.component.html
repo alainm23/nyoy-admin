@@ -1,0 +1,178 @@
+<nb-layout>
+  <nb-layout-column>
+    <nb-card [nbSpinner]="loading">
+      <nb-card-header>
+        Tipo:
+        &nbsp;
+        &nbsp;
+        <nb-select placeholder="Seleccione una opcion" (selectedChange)="tipo_reporte_changed ()" [(ngModel)]="tipo_reporte">
+          <nb-option value="diario">Reporte diario</nb-option>
+          <nb-option value="mensual">Reporte mensual</nb-option>
+          <nb-option value="anual">Reporte anual</nb-option>
+        </nb-select>
+        &nbsp;
+        &nbsp;
+        <ng-container *ngIf="tipo_reporte === 'diario'">
+          Fecha:
+          &nbsp;
+          &nbsp;
+          <input nbInput  size="tiny" type="date" (change)="mostrar_estadisticas ()" [(ngModel)]="fecha_seleccionada">
+        </ng-container>
+
+        <ng-container *ngIf="tipo_reporte === 'mensual'">
+          Mes:
+          &nbsp;
+          &nbsp;
+          <nb-select (selectedChange)="mostrar_estadisticas ()" [(ngModel)]="mes_seleccionado">
+            <nb-option value="01">Enero</nb-option>
+            <nb-option value="02">Febrero</nb-option>
+            <nb-option value="03">Marzo</nb-option>
+            <nb-option value="04">Abril</nb-option>
+            <nb-option value="05">Mayo</nb-option>
+            <nb-option value="06">Junio</nb-option>
+            <nb-option value="07">Julio</nb-option>
+            <nb-option value="08">Agosto</nb-option>
+            <nb-option value="09">Septiembre</nb-option>
+            <nb-option value="10">Obtumbre</nb-option>
+            <nb-option value="11">Noviembre</nb-option>
+            <nb-option value="12">Diciembre</nb-option>
+          </nb-select>
+          &nbsp;
+          &nbsp;
+          Año:
+          &nbsp;
+          &nbsp;
+          <nb-select (selectedChange)="mostrar_estadisticas ()" [(ngModel)]="anio_seleccionado">
+            <nb-option value="2020">2020</nb-option>
+            <nb-option value="2021">2021</nb-option>
+            <nb-option value="2022">2022</nb-option>
+            <nb-option value="2023">2023</nb-option>
+            <nb-option value="2024">2024</nb-option>
+            <nb-option value="2025">2025</nb-option>
+          </nb-select>
+        </ng-container>
+
+        <ng-container *ngIf="tipo_reporte === 'anual'">
+          Año:
+          &nbsp;
+          &nbsp;
+          <nb-select (selectedChange)="mostrar_estadisticas ()" [(ngModel)]="anio_seleccionado">
+            <nb-option value="2020">2020</nb-option>
+            <nb-option value="2021">2021</nb-option>
+            <nb-option value="2022">2022</nb-option>
+            <nb-option value="2023">2023</nb-option>
+            <nb-option value="2024">2024</nb-option>
+            <nb-option value="2025">2025</nb-option>
+          </nb-select>
+        </ng-container>
+        &nbsp;
+        &nbsp;
+        Empresa:
+        &nbsp;
+        &nbsp;
+        <nb-select (selectedChange)="mostrar_estadisticas ()" [(ngModel)]="empresa_seleccionada">
+          <nb-option *ngFor="let empresa of empresas" [value]="empresa.id">
+            {{ empresa.nombre }}
+          </nb-option>
+        </nb-select>
+      </nb-card-header>
+
+      <nb-card-header>
+        <div class="row">
+          <div class="col-4">
+            <nb-card accent="primary">
+              <nb-card-header>Ingresos</nb-card-header>
+              <nb-card-body>
+                <h2>{{ ventas_total | currency:'S/. ' }}</h2>
+              </nb-card-body>
+            </nb-card>
+          </div>
+
+          <div class="col-4">
+            <nb-card accent="danger">
+              <nb-card-header>Gastos</nb-card-header>
+              <nb-card-body>
+                <h2>{{ compras_total | currency:'S/. '  }}</h2>
+              </nb-card-body>
+            </nb-card>
+          </div>
+
+          <div class="col-4">
+            <nb-card accent="success">
+              <nb-card-header>Ganancias</nb-card-header>
+              <nb-card-body>
+                <h2>{{ get_ganancia () | currency:'S/. ' }}</h2>
+              </nb-card-body>
+            </nb-card>
+          </div>
+        </div>
+      </nb-card-header>
+
+      <nb-card-header>
+        <nb-select [(ngModel)]="tipo_filtro">
+          <nb-option value="ingresos">Ingresos</nb-option>
+          <nb-option value="gastos">Gastos</nb-option>
+        </nb-select>
+      </nb-card-header>
+
+      <nb-card-body *ngIf="tipo_filtro === 'gastos'">
+        <div class="row" style="padding: 6px; font-weight:bold; border-bottom:1px solid #666;">
+          <div class="col">Nombre</div>
+          <div class="col">Cantidad</div>
+          <div class="col">Monto (S/)</div>
+          <div class="col">Historial</div>
+        </div>
+
+        <div class="row" *ngFor="let item of gastos_map | keyvalue" style="align-items: center; padding: 6px; border-bottom:1px solid #CCC;">
+          <div class="col">
+            {{ item.value.nombre }}
+          </div>
+
+          <div class="col">
+            {{ item.value.cantidad }}
+          </div>
+
+          <div class="col">
+            {{ item.value.precio | currency:'S/ ' }}
+          </div>
+
+          <div class="col">
+            <button nbButton size="tiny" ghost status="primary">Ver historial</button>
+          </div>
+        </div>
+      </nb-card-body>
+
+      <nb-card-body *ngIf="tipo_filtro === 'ingresos'">
+        <div class="row" style="padding: 6px; font-weight:bold; border-bottom:1px solid #666;">
+          <div class="col">Nombre</div>
+          <div class="col">Tipo</div>
+          <div class="col">Cantidad</div>
+          <div class="col">Monto (S/)</div>
+          <div class="col">Historial</div>
+        </div>
+
+        <div class="row" *ngFor="let item of ingresos_map | keyvalue" style="align-items: center; padding: 6px; border-bottom:1px solid #CCC;">
+          <div class="col">
+            {{ item.value.nombre }}
+          </div>
+
+          <div class="col">
+            {{ item.value.tipo }}
+          </div>
+
+          <div class="col">
+            {{ item.value.cantidad }}
+          </div>
+
+          <div class="col">
+            {{ item.value.precio | currency:'S/ ' }}
+          </div>
+
+          <div class="col">
+            <button nbButton size="tiny" ghost status="primary">Ver historial</button>
+          </div>
+        </div>
+      </nb-card-body>
+    </nb-card>
+  </nb-layout-column>
+</nb-layout>

@@ -1,0 +1,67 @@
+<nb-layout>
+  <nb-layout-column>
+    <nb-card>
+      <nb-card-header>
+        <div class="row">
+          <div class="col-10">
+            {{ items.length }} Mesas
+          </div>
+
+          <div class="col-2">
+            <button nbButton fullWidth size="tiny" (click)="agregar_nuevo ()">Agregar</button>
+          </div>
+        </div>
+      </nb-card-header>
+
+      <nb-list>
+        <nb-list-item *ngIf="show_nuevo" [nbSpinner]="is_nuevo_loading" nbSpinnerStatus="primary">
+          <div class="row" style="width: 100%;">
+            <div class="col-8 align-self-center">
+              <input type="text" fieldSize="small" nbInput fullWidth placeholder="Nombre" [(ngModel)]="nuevo">
+            </div>
+
+            <div class="col-2 align-self-center">
+              <button nbButton size="tiny" fullWidth status="danger" (click)="cancel_nuevo ()">Cancelar</button>
+            </div>
+
+            <div class="col-2  align-self-center">
+              <button nbButton size="tiny" fullWidth status="success" [disabled]="nuevo === ''" (click)="guardar_nuevo ()">Guardar</button>
+            </div>
+          </div>
+        </nb-list-item>
+
+        <nb-list-item *ngFor="let item of items">
+          <div class="row" style="width: 100%;" *ngIf="item.edit === false || item.edit === undefined">
+            <div class="col-8 align-self-center">
+              {{ item.nombre }}
+            </div>
+
+            <div class="col-2 align-self-center">
+              <button nbButton fullWidth size="tiny" ghost (click)="editar (item)">
+                <nb-icon icon="edit-outline"></nb-icon>Editar
+              </button>
+            </div>
+
+            <div class="col-2 align-self-center">
+              <button nbButton status="danger" fullWidth size="tiny" ghost (click)="eliminar (item)"><nb-icon icon="trash-outline"></nb-icon>Eliminar</button>
+            </div>
+          </div>
+
+          <div class="row" style="width: 100%;" *ngIf="item.edit === true">
+            <div class="col-8 align-self-center">
+              <input type="text" [id]="item.id" [value]="item.nombre" fieldSize="small" nbInput fullWidth placeholder="Nombre">
+            </div>
+
+            <div class="col-2 align-self-center">
+              <button nbButton size="tiny" fullWidth status="danger" (click)="cancel (item)">Cancelar</button>
+            </div>
+
+            <div class="col-2  align-self-center">
+              <button nbButton size="tiny" fullWidth status="success" (click)="guardar (item)">Guardar</button>
+            </div>
+          </div>
+        </nb-list-item>
+      </nb-list>
+    </nb-card>
+  </nb-layout-column>
+</nb-layout>
