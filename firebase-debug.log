@@ -1,0 +1,13 @@
+[debug] [2021-03-15T22:31:53.071Z] ----------------------------------------------------------------------
+[debug] [2021-03-15T22:31:53.073Z] Command:       /usr/bin/node /usr/bin/firebase deploy
+[debug] [2021-03-15T22:31:53.074Z] CLI Version:   9.6.1
+[debug] [2021-03-15T22:31:53.074Z] Platform:      linux
+[debug] [2021-03-15T22:31:53.074Z] Node Version:  v10.24.0
+[debug] [2021-03-15T22:31:53.075Z] Time:          Mon Mar 15 2021 17:31:53 GMT-0500 (GMT-05:00)
+[debug] [2021-03-15T22:31:53.075Z] ----------------------------------------------------------------------
+[debug] [2021-03-15T22:31:53.075Z] 
+[debug] [2021-03-15T22:31:53.092Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2021-03-15T22:31:53.093Z] > authorizing via signed-in user
+[debug] [2021-03-15T22:31:53.093Z] [iam] checking project nyoy-99c14 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2021-03-15T22:31:53.095Z] >>> HTTP REQUEST POST https://cloudresourcemanager.googleapis.com/v1/projects/nyoy-99c14:testIamPermissions  
+ {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}

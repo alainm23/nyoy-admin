@@ -11,6 +11,7 @@ import { CoreModule } from './@core/core.module';
 import { ThemeModule } from './@theme/theme.module';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
+
 import {
   NbChatModule,
   NbDatepickerModule,
@@ -43,17 +44,17 @@ import { OrderModule } from 'ngx-order-pipe';
     BrowserAnimationsModule,
     HttpClientModule,
     AppRoutingModule,
-    NbSidebarModule.forRoot(),
-    NbMenuModule.forRoot(),
-    NbDatepickerModule.forRoot(),
-    NbDialogModule.forRoot(),
-    NbWindowModule.forRoot(),
-    NbToastrModule.forRoot(),
-    NbChatModule.forRoot({
+    NbSidebarModule.forRoot (),
+    NbMenuModule.forRoot (),
+    NbDatepickerModule.forRoot (),
+    NbDialogModule.forRoot (),
+    NbWindowModule.forRoot (),
+    NbToastrModule.forRoot (),
+    NbChatModule.forRoot ({
       messageGoogleMapKey: 'AIzaSyA_wNuCzia92MAmdLRzmqitRGvCF7wCZPY',
     }),
-    CoreModule.forRoot(),
-    ThemeModule.forRoot(),
+    CoreModule.forRoot (),
+    ThemeModule.forRoot (),
 
     AngularFireModule.initializeApp (environment.firebase),
     AngularFirestoreModule,

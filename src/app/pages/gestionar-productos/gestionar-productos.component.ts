@@ -2,12 +2,14 @@ import { Component, OnInit } from '@angular/core';
 
 // Services
 import { DatabaseService } from '../../services/database.service';
+import { AuthService } from '../../services/auth.service';
 import { NbDialogService } from '@nebular/theme';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { finalize } from 'rxjs/operators';
 
 // Forms
 import { FormGroup , FormControl, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 // Nebular
 import { NbSortDirection, NbSortRequest, NbTreeGridDataSource, NbTreeGridDataSourceBuilder } from '@nebular/theme';
@@ -49,9 +51,15 @@ export class GestionarProductosComponent implements OnInit {
     private dialogService: NbDialogService,
     private dataSourceBuilder: NbTreeGridDataSourceBuilder<any>,
     private af_storage: AngularFireStorage,
+    private auth: AuthService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
+    if (this.auth.usuario.tipo !== 0) {
+      this.router.navigate(['/gestionar-ventas']);
+    }
+
     this.form = new FormGroup ({
       id: new FormControl (),
       sku: new FormControl (''),

@@ -186,19 +186,19 @@ export class AuthService {
   constructor (public afAuth: AngularFireAuth,
     public router: Router,
     public database: DatabaseService) {
-      this.authState ().subscribe ((usuario: firebase.User) => {
-        if (usuario) {
-          this.database.get_usuario_by_id (usuario.uid).subscribe ((res: any) => {
-            if (res !== undefined) {
-              this.usuario = res;
-              this.format_menu (this.usuario.tipo);
-              this.esta_logeado = true;
-            }
-          });
-        } else {
-          this.format_menu (null);
-        }
-      });
+      // this.authState ().subscribe ((usuario: firebase.User) => {
+      //   if (usuario) {
+      //     this.database.get_usuario_by_id (usuario.uid).subscribe ((res: any) => {
+      //       if (res !== undefined) {
+      //         this.usuario = res;
+      //         this.format_menu (this.usuario.tipo);
+      //         this.esta_logeado = true;
+      //       }
+      //     });
+      //   } else {
+      //     this.format_menu (null);
+      //   }
+      // });
   }
 
   async isLogin () {
